@@ -17,10 +17,17 @@ from pytorch_lightning import seed_everything
 from exp.exp_moe2 import Exp_MoE
 
 
-# Do not change the following lines
+# specify the paths 
+root_path = "../sdreamer_input_data/"
+data_path = "../sdreamer_output_data/seq/"
+checkpoints = "../sdreamer_checkpoints"
+
+# model save directory name
+des_name = "SeqNewMoE2_Seq_pl16_el2_cl1_f1_seql3_kl_2.0_t3.5"
+
+# hyperparameters
 activation = "glu"
 norm_type = "layernorm"
-des_name = "SeqNewMoE2_Seq_pl16_el2_cl1_f1_seql3_kl_2.0_t3.5"
 patch_len = 16
 seed = 42
 ca_layers = 1
@@ -40,8 +47,8 @@ config = dict(
     data="Seq",
     isNE=False,
     fold=1,
-    root_path="../sdreamer_input_data/",
-    data_path="../sdreamer_output_data/seq/",
+    root_path=root_path,
+    data_path=data_path,
     features="ALL",
     n_sequences=n_sequences,
     useNorm=True,
@@ -86,7 +93,7 @@ config = dict(
     weight=[1, 1, 1],
     visualize_mode=[],
     visualizations="",
-    checkpoints="../sdreamer_checkpoints",
+    checkpoints=checkpoints,
     reload_best=True,
     reload_ckpt=None,
     use_gpu=True,
@@ -96,10 +103,8 @@ config = dict(
     print_freq=50,
     #output_path=output_path,
     #ne_patch_len=ne_patch_len,
-    des=des_name,
-    
+    des=des_name,    
     #pad=False,
- 
 )
 
 parser = argparse.ArgumentParser(description="Transformer family for sleep scoring")

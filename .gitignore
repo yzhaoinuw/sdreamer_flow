@@ -22,7 +22,6 @@ logs/
 *.pyc
 *.npy
 *.jpg
-*.txt
 *.png
 visualizations/
 visualization/

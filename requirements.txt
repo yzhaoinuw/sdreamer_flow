@@ -1,0 +1,6 @@
+timm==0.9.16
+einops==0.8.0
+librosa==0.10.2.post1
+opencv-python==4.9.0.80
+lightning==2.2.4
+seaborn==0.13.2
