@@ -101,8 +101,8 @@ class Model(nn.Module):
         logits = rearrange(logits, 'b e d -> (b e) d')
         logits_eeg = rearrange(logits_eeg, 'b e d -> (b e) d')
         logits_emg = rearrange(logits_emg, 'b e d -> (b e) d')
-        
-        label = rearrange(label, 'b e d -> (b e) d')
+        if label is not None:
+            label = rearrange(label, 'b e d -> (b e) d')
 
         out_dict={  "out": logits,
                     "out_eeg": logits_eeg,
