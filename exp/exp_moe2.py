@@ -6,7 +6,7 @@ from data_provider.data_generator import data_generator, visualize_data_generato
 #SimMoE, FreqCM, NewMoE, NewMoE2)
 #from models.seq import n2nViTTransformer, n2nCMATransformer, n2nMacrossTransformer,n2nMoETransformer, \
 #n2nBaseLine, n2nSeqCM, n2nCMTransformer,n2nSeqMoE, n2nSeqNewMoE, n2nSeqNewMoE2, n2nSeqHMoE
-from models.seq import n2nSeqNewMoE2
+from models.seq import n2nSeqNewMoE2, n2nSeqHMoE
 # from utils.tools import EarlyStopping, adjust_learning_rate, visual, test_params_flop
 from utils.metrics import ProgressMeter
 from utils.metric_tracker import batch_updater, build_tracker_mome
@@ -76,7 +76,7 @@ class Exp_MoE(object):
             #'FreqCM': FreqCM,
             #'SeqNewMoE': n2nSeqNewMoE,
             'SeqNewMoE2': n2nSeqNewMoE2,
-            #'SeqHMoE': n2nSeqHMoE,
+            'SeqHMoE': n2nSeqHMoE,
         }
         if self.args.features == "ALL":
             model = model_dict[self.args.model].Model(self.args)

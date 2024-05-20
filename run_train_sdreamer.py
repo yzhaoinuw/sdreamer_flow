@@ -23,7 +23,7 @@ data_path = "../sdreamer_output_data/seq/"
 checkpoints = "../sdreamer_checkpoints"
 
 # model save directory name
-des_name = "SeqNewMoE2_Seq_pl16_el2_cl1_f1_seql3_kl_2.0_t3.5"
+des_name = "SeqHMoE_Seq_pl16_el2_cl1_f1_seql3_kl_2.0_t3.0"
 
 # hyperparameters
 activation = "glu"
@@ -43,7 +43,7 @@ config = dict(
     seed=42,
     is_training=1,
     model_id="test",
-    model="SeqNewMoE2",
+    model="SeqHMoE",
     data="Seq",
     isNE=False,
     fold=1,
