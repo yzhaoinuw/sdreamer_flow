@@ -1,3 +1,9 @@
+# Training
+follow run_train_sdreamer.py
+
+To prepare for the training dataset, follow write_data_sdreamer.py
+
+# Original README below
 # Flow
 
 # File Structure
