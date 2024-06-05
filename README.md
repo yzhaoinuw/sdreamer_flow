@@ -1,7 +1,22 @@
-# Training
+## Training
 follow run_train_sdreamer.py
 
 To prepare for the training dataset, follow write_data_sdreamer.py
+
+## Citing sDREAMER
+Please cite [the paper below](https://www.cs.rochester.edu/u/yyao39/files/sDREAMER.pdf) when you use sDREAMER
+```
+@INPROCEEDINGS{10224751,
+  author={Chen, Jingyuan and Yao, Yuan and Anderson, Mie and Hauglund, Natalie and Kjaerby, Celia and Untiet, Verena and Nedergaard, Maiken and Luo, Jiebo},
+  booktitle={2023 IEEE International Conference on Digital Health (ICDH)}, 
+  title={sDREAMER: Self-distilled Mixture-of-Modality-Experts Transformer for Automatic Sleep Staging}, 
+  year={2023},
+  volume={},
+  number={},
+  pages={131-142},
+  keywords={Training;Sleep;Brain modeling;Transformers;Electromyography;Electroencephalography;Electronic healthcare;sleep scoring;distillation;transformer;mixture-of-modality experts},
+  doi={10.1109/ICDH60066.2023.00028}}
+```
 
 # Original README below
 # Flow
