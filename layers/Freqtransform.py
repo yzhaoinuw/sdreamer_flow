@@ -5,6 +5,8 @@ import torch.nn.functional as F
 from torch import nn, einsum
 from einops import rearrange, repeat
 from timm.models.layers import DropPath, to_2tuple, trunc_normal_
+
+
 class STFT(torch.nn.Module):
     def __init__(
         self,
@@ -38,27 +40,26 @@ class STFT(torch.nn.Module):
         """
 
         # Managing multi-channel stft
-        if x.ndim==5:
-            b,e,t,c,d = x.shape
+        if x.ndim == 5:
+            b, e, t, c, d = x.shape
         else:
-            b,t,c,d = x.shape
-        src_x = rearrange(x, 'b ... t c d -> (b ... t c) d')
-        
-        stft = torch.stft(
-                src_x,
-                self.n_fft,
-                self.hop_length,
-                self.win_length,
-                self.window,
-                self.center,
-                self.pad_mode,
-                self.normalized_stft,
-                self.onesided,
-                return_complex=False,
-        )[:,:,:,0]
-        if x.ndim==5:
-            stft = rearrange(stft, '(b e t c) d n -> b e t n (c d)', b=b, e=e, t=t, c=c)
-        else:
-            stft = rearrange(stft, '(b t c) d n -> b t n (c d)', b=b, t=t, c=c)
-        return stft
+            b, t, c, d = x.shape
+        src_x = rearrange(x, "b ... t c d -> (b ... t c) d")
 
+        stft = torch.stft(
+            src_x,
+            self.n_fft,
+            self.hop_length,
+            self.win_length,
+            self.window,
+            self.center,
+            self.pad_mode,
+            self.normalized_stft,
+            self.onesided,
+            return_complex=False,
+        )[:, :, :, 0]
+        if x.ndim == 5:
+            stft = rearrange(stft, "(b e t c) d n -> b e t n (c d)", b=b, e=e, t=t, c=c)
+        else:
+            stft = rearrange(stft, "(b t c) d n -> b t n (c d)", b=b, t=t, c=c)
+        return stft

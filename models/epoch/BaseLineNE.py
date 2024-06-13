@@ -14,14 +14,14 @@ import librosa
 import numpy as np
 from timm.models.layers import DropPath, to_2tuple, trunc_normal_
 
-class Model(nn.Module):
 
+class Model(nn.Module):
     def __init__(self, args):
         super().__init__()
         c_in = 1
         c_out = args.c_out
         d_model = args.d_model
-        n_heads = args.n_heads 
+        n_heads = args.n_heads
         seq_len = args.seq_len
         dropout = args.dropout
         path_drop = args.path_drop
@@ -36,46 +36,77 @@ class Model(nn.Module):
         mult_ff = args.d_ff // d_model
         n_traces = 3 if args.features == "ALL" else 1
 
-        assert (seq_len % patch_len) == 0 
+        assert (seq_len % patch_len) == 0
         n_patches = seq_len // patch_len
 
         # self.stft_transform = STFT(win_length=patch_len,n_fft=256,hop_length=patch_len)
-        self.emg_transformer =  Transformer(
-                                    patch_len, n_patches, e_layers, c_in, 
-                                    inner_dim, n_heads = n_heads, d_head = d_head,
-                                    dropout = dropout, path_drop = path_drop, 
-                                    activation = activation, norm = norm_type, 
-                                    mult = mult_ff, mix_type = args.mix_type, 
-                                    cls = True, flag = "epoch", domain = "time",
-                                    output_attentions=self.output_attentions
-                                )
-        
-        self.eeg_transformer =  Transformer(
-                                    patch_len, n_patches, e_layers, c_in, 
-                                    inner_dim, n_heads = n_heads, d_head = d_head,
-                                    dropout = dropout, path_drop = path_drop, 
-                                    activation = activation, norm = norm_type, 
-                                    mult = mult_ff, mix_type = args.mix_type, 
-                                    cls = True, flag = "epoch", domain = "time",
-                                    output_attentions=self.output_attentions
-                                )
-        self.ne_transformer =  SWTransformer(
-                                    ne_patch_len, n_patches, e_layers, c_in, 
-                                    inner_dim, n_heads = n_heads, d_head = d_head,
-                                    dropout = dropout, path_drop = path_drop, 
-                                    activation = activation, norm = norm_type, 
-                                    mult = mult_ff, mix_type = args.mix_type, 
-                                    cls = True, flag = "epoch", domain = "time",
-                                    output_attentions=self.output_attentions,
-                                    stride=ne_patch_len, pad=True
-                                )
-    
+        self.emg_transformer = Transformer(
+            patch_len,
+            n_patches,
+            e_layers,
+            c_in,
+            inner_dim,
+            n_heads=n_heads,
+            d_head=d_head,
+            dropout=dropout,
+            path_drop=path_drop,
+            activation=activation,
+            norm=norm_type,
+            mult=mult_ff,
+            mix_type=args.mix_type,
+            cls=True,
+            flag="epoch",
+            domain="time",
+            output_attentions=self.output_attentions,
+        )
+
+        self.eeg_transformer = Transformer(
+            patch_len,
+            n_patches,
+            e_layers,
+            c_in,
+            inner_dim,
+            n_heads=n_heads,
+            d_head=d_head,
+            dropout=dropout,
+            path_drop=path_drop,
+            activation=activation,
+            norm=norm_type,
+            mult=mult_ff,
+            mix_type=args.mix_type,
+            cls=True,
+            flag="epoch",
+            domain="time",
+            output_attentions=self.output_attentions,
+        )
+        self.ne_transformer = SWTransformer(
+            ne_patch_len,
+            n_patches,
+            e_layers,
+            c_in,
+            inner_dim,
+            n_heads=n_heads,
+            d_head=d_head,
+            dropout=dropout,
+            path_drop=path_drop,
+            activation=activation,
+            norm=norm_type,
+            mult=mult_ff,
+            mix_type=args.mix_type,
+            cls=True,
+            flag="epoch",
+            domain="time",
+            output_attentions=self.output_attentions,
+            stride=ne_patch_len,
+            pad=True,
+        )
+
         self.mlp_head = nn.Sequential(
-            nn.LayerNorm(inner_dim * n_traces),
-            nn.Linear(inner_dim * n_traces, c_out))
-        
+            nn.LayerNorm(inner_dim * n_traces), nn.Linear(inner_dim * n_traces, c_out)
+        )
+
         self.apply(self._init_weights)
-    
+
     def _init_weights(self, m):
         if isinstance(m, nn.Linear):
             trunc_normal_(m.weight, std=0.02)
@@ -88,36 +119,35 @@ class Model(nn.Module):
     def forward(self, x, ne, label):
         # note: if no context is given, cross-attention defaults to self-attention
         # x --> [batch, trace, channel, inner_dim]
-        emg, eeg, ne = x[:,0], x[:,1], ne[:,0]
+        emg, eeg, ne = x[:, 0], x[:, 1], ne[:, 0]
 
         emg, emg_attn = self.emg_transformer(emg)
         eeg, eeg_attn = self.eeg_transformer(eeg)
         ne, ne_attn = self.ne_transformer(ne)
 
-        cls_emg, cls_eeg, cls_ne = emg[:,-1], eeg[:,-1], ne[:,-1]
+        cls_emg, cls_eeg, cls_ne = emg[:, -1], eeg[:, -1], ne[:, -1]
         # x_our --> [b, n, 2d]
         emb = torch.cat([cls_emg, cls_eeg, cls_ne], dim=-1)
         out = self.mlp_head(emb)
 
         out_dict = {
-            "out": out, 
-            "eeg_attn": eeg_attn, 
-            "emg_attn": emg_attn, 
+            "out": out,
+            "eeg_attn": eeg_attn,
+            "emg_attn": emg_attn,
             "ne_attn": ne_attn,
-            "cls_feats": emb, 
-            "label": label
+            "cls_feats": emb,
+            "label": label,
         }
         return out_dict
-    
+
 
 class Mono_Model(nn.Module):
-
     def __init__(self, args):
         super().__init__()
         c_in = 1
         c_out = args.c_out
         d_model = args.d_model
-        n_heads = args.n_heads 
+        n_heads = args.n_heads
         seq_len = args.seq_len
         dropout = args.dropout
         path_drop = args.path_drop
@@ -132,35 +162,60 @@ class Mono_Model(nn.Module):
         mult_ff = args.d_ff // d_model
         n_traces = 2 if args.features == "ALL" else 1
         self.features = args.features
-        assert (seq_len % patch_len) == 0 
+        assert (seq_len % patch_len) == 0
         n_patches = seq_len // patch_len
 
         # self.stft_transform = STFT(win_length=patch_len,n_fft=256,hop_length=patch_len)
-        self.transformer =  Transformer(
-                                    patch_len, n_patches, e_layers, c_in, 
-                                    inner_dim, n_heads = n_heads, d_head = d_head,
-                                    dropout = dropout, path_drop = path_drop, 
-                                    activation = activation, norm = norm_type, 
-                                    mult = mult_ff, mix_type = args.mix_type, 
-                                    cls = True, flag = "epoch", domain = "time",
-                                    output_attentions=self.output_attentions
-                                ) if self.features !="NE" else SWTransformer(
-                                    ne_patch_len, n_patches, e_layers, c_in, 
-                                    inner_dim, n_heads = n_heads, d_head = d_head,
-                                    dropout = dropout, path_drop = path_drop, 
-                                    activation = activation, norm = norm_type, 
-                                    mult = mult_ff, mix_type = args.mix_type, 
-                                    cls = True, flag = "epoch", domain = "time",
-                                    output_attentions=self.output_attentions,
-                                    stride=ne_patch_len, pad=True
-                                )
-        
+        self.transformer = (
+            Transformer(
+                patch_len,
+                n_patches,
+                e_layers,
+                c_in,
+                inner_dim,
+                n_heads=n_heads,
+                d_head=d_head,
+                dropout=dropout,
+                path_drop=path_drop,
+                activation=activation,
+                norm=norm_type,
+                mult=mult_ff,
+                mix_type=args.mix_type,
+                cls=True,
+                flag="epoch",
+                domain="time",
+                output_attentions=self.output_attentions,
+            )
+            if self.features != "NE"
+            else SWTransformer(
+                ne_patch_len,
+                n_patches,
+                e_layers,
+                c_in,
+                inner_dim,
+                n_heads=n_heads,
+                d_head=d_head,
+                dropout=dropout,
+                path_drop=path_drop,
+                activation=activation,
+                norm=norm_type,
+                mult=mult_ff,
+                mix_type=args.mix_type,
+                cls=True,
+                flag="epoch",
+                domain="time",
+                output_attentions=self.output_attentions,
+                stride=ne_patch_len,
+                pad=True,
+            )
+        )
+
         self.mlp_head = nn.Sequential(
-            nn.LayerNorm(inner_dim * n_traces),
-            nn.Linear(inner_dim * n_traces, c_out))
-        
+            nn.LayerNorm(inner_dim * n_traces), nn.Linear(inner_dim * n_traces, c_out)
+        )
+
         self.apply(self._init_weights)
-    
+
     def _init_weights(self, m):
         if isinstance(m, nn.Linear):
             trunc_normal_(m.weight, std=0.02)
@@ -175,21 +230,21 @@ class Mono_Model(nn.Module):
         # x --> [batch, trace, channel, inner_dim]
 
         if self.features == "EMG":
-            sig = x[:,0]
+            sig = x[:, 0]
         elif self.features == "EEG":
-            sig = x[:,1]
+            sig = x[:, 1]
         else:
-            sig = ne[:,0]
+            sig = ne[:, 0]
         sig, sig_attn = self.transformer(sig)
         emb = sig[:, -1]
         out = self.mlp_head(emb)
 
         out_dict = {
-            "out": out, 
-            "eeg_attn": sig_attn if self.features == "EEG" else None, 
-            "emg_attn": sig_attn if self.features == "EMG" else None, 
+            "out": out,
+            "eeg_attn": sig_attn if self.features == "EEG" else None,
+            "emg_attn": sig_attn if self.features == "EMG" else None,
             "ne_attn": sig_attn if self.features == "NE" else None,
             "cls_feats": emb,
-            "label": label
+            "label": label,
         }
         return out_dict

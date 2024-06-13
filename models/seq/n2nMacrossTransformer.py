@@ -11,13 +11,12 @@ from layers.norm import PreNorm
 
 
 class Model(nn.Module):
-
     def __init__(self, args):
         super().__init__()
         c_in = 1
         c_out = args.c_out
         d_model = args.d_model
-        n_heads = args.n_heads 
+        n_heads = args.n_heads
         seq_len = args.seq_len
         dropout = args.dropout
         e_layers = args.e_layers
@@ -32,45 +31,90 @@ class Model(nn.Module):
         mult_ff = args.d_ff // d_model
         n_traces = 2 if args.features == "ALL" else 1
 
-        assert (seq_len % patch_len) == 0 
+        assert (seq_len % patch_len) == 0
         n_patches = seq_len // patch_len
 
         self.pos_embedding = nn.Parameter(torch.randn(1, 1, n_patches + 1, inner_dim))
         self.ep_embedding = nn.Parameter(torch.randn(1, n_sequences + 1, inner_dim))
 
-
-        self.cls_eeg = nn.Parameter(torch.randn(1,1,1, inner_dim))
-        self.cls_emg = nn.Parameter(torch.randn(1,1,1, inner_dim))
+        self.cls_eeg = nn.Parameter(torch.randn(1, 1, 1, inner_dim))
+        self.cls_emg = nn.Parameter(torch.randn(1, 1, 1, inner_dim))
 
         self.patch_encs = nn.ModuleList(
-            [LinearPatchEncoder2(trace_idx, patch_len, c_in, inner_dim) 
-                for trace_idx in range(n_traces)])
+            [
+                LinearPatchEncoder2(trace_idx, patch_len, c_in, inner_dim)
+                for trace_idx in range(n_traces)
+            ]
+        )
 
         self.eeg_transformer = nn.ModuleList(
-            [MultiHeadAttention(inner_dim, n_heads, d_head, dropout=dropout, activation=activation,
-            norm=norm_type, mult=mult_ff) for _ in range(e_layers)])
+            [
+                MultiHeadAttention(
+                    inner_dim,
+                    n_heads,
+                    d_head,
+                    dropout=dropout,
+                    activation=activation,
+                    norm=norm_type,
+                    mult=mult_ff,
+                )
+                for _ in range(e_layers)
+            ]
+        )
 
         self.emg_transformer = nn.ModuleList(
-            [MultiHeadAttention(inner_dim, n_heads, d_head, dropout=dropout, activation=activation,
-            norm=norm_type, mult=mult_ff) for _ in range(e_layers)])
-        
+            [
+                MultiHeadAttention(
+                    inner_dim,
+                    n_heads,
+                    d_head,
+                    dropout=dropout,
+                    activation=activation,
+                    norm=norm_type,
+                    mult=mult_ff,
+                )
+                for _ in range(e_layers)
+            ]
+        )
+
         self.macaron_transformer = nn.ModuleList(
-            [MacaronBlock(inner_dim, n_heads, d_head, dropout=dropout, activation=activation,
-            norm=norm_type, mult=mult_ff) for _ in range(1)])
-        
+            [
+                MacaronBlock(
+                    inner_dim,
+                    n_heads,
+                    d_head,
+                    dropout=dropout,
+                    activation=activation,
+                    norm=norm_type,
+                    mult=mult_ff,
+                )
+                for _ in range(1)
+            ]
+        )
+
         self.cross_epoch_tranfomer = nn.ModuleList(
-            [MultiHeadAttention(inner_dim, n_heads, d_head, dropout=dropout, activation=activation,
-            norm=norm_type, mult=mult_ff) for _ in range(e_layers)])
+            [
+                MultiHeadAttention(
+                    inner_dim,
+                    n_heads,
+                    d_head,
+                    dropout=dropout,
+                    activation=activation,
+                    norm=norm_type,
+                    mult=mult_ff,
+                )
+                for _ in range(e_layers)
+            ]
+        )
 
         self.proj = nn.Sequential(
             nn.LayerNorm(inner_dim * n_traces),
             nn.Linear(inner_dim * n_traces, inner_dim),
-            )
-        
+        )
+
         self.mlp_head = nn.Sequential(
-            nn.LayerNorm(inner_dim),
-            nn.Linear(inner_dim, c_out)
-            )
+            nn.LayerNorm(inner_dim), nn.Linear(inner_dim, c_out)
+        )
 
     def forward(self, x, label):
         # note: if no context is given, cross-attention defaults to self-attention
@@ -82,35 +126,34 @@ class Model(nn.Module):
         eeg = eeg + self.pos_embedding[:, :, :n]
         emg = emg + self.pos_embedding[:, :, :n]
 
-        cls_eeg = repeat(self.cls_eeg, '() () n d -> b e n d', b=b, e=e)
-        cls_emg = repeat(self.cls_emg, '() () n d -> b e n d', b=b, e=e)
-        src_eeg = torch.cat([eeg, cls_eeg],dim=-2)
-        src_emg = torch.cat([emg, cls_emg],dim=-2)
+        cls_eeg = repeat(self.cls_eeg, "() () n d -> b e n d", b=b, e=e)
+        cls_emg = repeat(self.cls_emg, "() () n d -> b e n d", b=b, e=e)
+        src_eeg = torch.cat([eeg, cls_eeg], dim=-2)
+        src_emg = torch.cat([emg, cls_emg], dim=-2)
 
         for block, block2 in zip(self.eeg_transformer, self.emg_transformer):
             src_eeg = block(src_eeg, context=None)
             src_emg = block2(src_emg, context=None)
-        
+
         # cls_x1 --> [batch, epoch, inner_dim]
         for block in self.macaron_transformer:
             src_eeg, src_emg = block(src_eeg, src_emg)
 
-        cls_eeg, cls_emg = src_eeg[:,:,-1], src_emg[:,:,-1]
-        
+        cls_eeg, cls_emg = src_eeg[:, :, -1], src_emg[:, :, -1]
+
         # emb --> [batch, epoch, inner_dim*2]
         emb = torch.cat([cls_eeg, cls_emg], dim=-1)
         # emb --> [batch, epoch, inner_dim]
         emb = self.proj(emb)
-        emb = emb + self.ep_embedding[:,:e]
-        
+        emb = emb + self.ep_embedding[:, :e]
+
         for block in self.cross_epoch_tranfomer:
             emb = block(emb, context=None)
 
         out = self.mlp_head(emb)
-        out = rearrange(out, 'b e d -> (b e) d', b=b)
-        label = rearrange(label, 'b e d -> (b e) d', b=b)
+        out = rearrange(out, "b e d -> (b e) d", b=b)
+        label = rearrange(label, "b e d -> (b e) d", b=b)
         return out, None, None, emb, label
-
 
 
 # class Model(nn.Module):
@@ -120,7 +163,7 @@ class Model(nn.Module):
 #         c_in = 1
 #         c_out = args.c_out
 #         d_model = args.d_model
-#         n_heads = args.n_heads 
+#         n_heads = args.n_heads
 #         seq_len = args.seq_len
 #         dropout = args.dropout
 #         e_layers = args.e_layers
@@ -132,7 +175,7 @@ class Model(nn.Module):
 #         inner_dim = n_heads * d_head
 #         n_traces = 2 if args.features == "ALL" else 1
 
-#         assert (seq_len % patch_len) == 0 
+#         assert (seq_len % patch_len) == 0
 #         n_patches = seq_len // patch_len
 
 #         self.pos_embedding = nn.Parameter(torch.randn(1, 1, n_patches + 1, inner_dim))
@@ -141,7 +184,7 @@ class Model(nn.Module):
 #         self.cls_token = nn.Parameter(torch.randn(1,1,1, inner_dim))
 
 #         self.patch_encs = nn.ModuleList(
-#             [LinearPatchEncoder2(trace_idx, patch_len, c_in, inner_dim) 
+#             [LinearPatchEncoder2(trace_idx, patch_len, c_in, inner_dim)
 #                 for trace_idx in range(n_traces)])
 
 #         self.eeg_transformer = nn.ModuleList(
@@ -160,7 +203,7 @@ class Model(nn.Module):
 #             nn.LayerNorm(inner_dim * n_traces),
 #             nn.Linear(inner_dim * n_traces, inner_dim),
 #             )
-        
+
 #         self.mlp_head = nn.Sequential(
 #             nn.LayerNorm(inner_dim),
 #             nn.Linear(inner_dim, c_out)
@@ -185,16 +228,16 @@ class Model(nn.Module):
 
 #         for block in self.emg_transformer:
 #             src_emg = block(src_emg, context=None)
-            
+
 #         # cls_x1 --> [batch, epoch, inner_dim]
 #         cls_eeg, cls_emg = src_eeg[:,:,-1], src_emg[:,:,-1]
-        
+
 #         # emb --> [batch, epoch, inner_dim*2]
 #         emb = torch.cat([cls_eeg, cls_emg], dim=-1)
 #         # emb --> [batch, epoch, inner_dim]
 #         emb = self.proj(emb)
 #         emb = emb + self.ep_embedding[:,:e]
-        
+
 #         for block in self.cross_epoch_tranfomer:
 #             emb = block(emb, context=None)
 

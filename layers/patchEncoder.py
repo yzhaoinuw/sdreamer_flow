@@ -6,8 +6,8 @@ from einops.layers.torch import Rearrange
 
 
 class LinearPatchEncoder(nn.Module):
-    # Batch x Epoch x Trace x Channel x Time 
-    # Batch x Epoch x Trace x Channel x (Patch_num x Patch_len) 
+    # Batch x Epoch x Trace x Channel x Time
+    # Batch x Epoch x Trace x Channel x (Patch_num x Patch_len)
     # Batch x Epoch x Trace x Patch_num x (Channel x Patch_len)
 
     def __init__(self, trace_id=0, patch_len=16, in_channel=1, d_model=128):
@@ -16,22 +16,21 @@ class LinearPatchEncoder(nn.Module):
         self.trace_id = trace_id
         self.patch_dim = patch_len * in_channel
         self.to_patch_embedding = nn.Sequential(
-            Rearrange('b ... c (n l) -> b ... n (l c)', l = patch_len),
+            Rearrange("b ... c (n l) -> b ... n (l c)", l=patch_len),
             nn.LayerNorm(self.patch_dim),
             nn.Linear(self.patch_dim, d_model),
             nn.LayerNorm(d_model),
         )
 
     def forward(self, x):
-        
-        trace = x[:,:,self.trace_id] if x.ndim == 5 else x[:,self.trace_id]
+        trace = x[:, :, self.trace_id] if x.ndim == 5 else x[:, self.trace_id]
         trace_emb = self.to_patch_embedding(trace)
         return trace_emb
 
 
 class LinearPatchEncoder2(nn.Module):
-    # Batch x Epoch x Trace x Channel x Time 
-    # Batch x Epoch x Trace x Channel x (Patch_num x Patch_len) 
+    # Batch x Epoch x Trace x Channel x Time
+    # Batch x Epoch x Trace x Channel x (Patch_num x Patch_len)
     # Batch x Epoch x Trace x Patch_num x (Channel x Patch_len)
 
     def __init__(self, trace_id=0, patch_len=16, in_channel=1, d_model=128):
@@ -40,20 +39,21 @@ class LinearPatchEncoder2(nn.Module):
         self.trace_id = trace_id
         self.patch_dim = patch_len * in_channel
         self.to_patch_embedding = nn.Sequential(
-            Rearrange('b ... c (n l) -> b ... n (l c)', l = patch_len),
+            Rearrange("b ... c (n l) -> b ... n (l c)", l=patch_len),
             nn.Linear(self.patch_dim, d_model, bias=True),
             nn.ReLU(inplace=True),
             nn.Linear(d_model, d_model, bias=True),
         )
 
     def forward(self, x):
-        trace = x[:,:,self.trace_id] if x.ndim == 5 else x[:,self.trace_id]
-        trace_emb = self.to_patch_embedding(trace) # 128 * 32 * 128
-        return trace_emb 
+        trace = x[:, :, self.trace_id] if x.ndim == 5 else x[:, self.trace_id]
+        trace_emb = self.to_patch_embedding(trace)  # 128 * 32 * 128
+        return trace_emb
+
 
 class CNNPatchEncoder(nn.Module):
-    # Batch x Epoch x Trace x Channel x Time 
-    # Batch x Epoch x Trace x Channel x (Patch_num x Patch_len) 
+    # Batch x Epoch x Trace x Channel x Time
+    # Batch x Epoch x Trace x Channel x (Patch_num x Patch_len)
     # Batch x Epoch x Trace x Patch_num x (Channel x Patch_len)
 
     def __init__(self, trace_id=0):
@@ -80,7 +80,7 @@ class CNNPatchEncoder(nn.Module):
 
     def forward(self, x):
         # 128 * 1 * 512
-        trace = x[:,:,self.trace_id] if x.ndim == 5 else x[:,self.trace_id]
+        trace = x[:, :, self.trace_id] if x.ndim == 5 else x[:, self.trace_id]
         trace_emb = self.encoder_1(trace)
         trace_emb = self.encoder_2(trace_emb)
         trace_emb = self.encoder_3(trace_emb)
@@ -90,8 +90,8 @@ class CNNPatchEncoder(nn.Module):
 
 
 class PatchEncoder(nn.Module):
-    # Batch x Epoch x Trace x Channel x Time 
-    # Batch x Epoch x Trace x Channel x (Patch_num x Patch_len) 
+    # Batch x Epoch x Trace x Channel x Time
+    # Batch x Epoch x Trace x Channel x (Patch_num x Patch_len)
     # Batch x Epoch x Trace x Patch_num x (Channel x Patch_len)
 
     def __init__(self, patch_len=16, in_channel=1, d_model=128):
@@ -99,20 +99,20 @@ class PatchEncoder(nn.Module):
 
         self.patch_dim = patch_len * in_channel
         self.to_patch_embedding = nn.Sequential(
-            Rearrange('b ... c (n l) -> b ... n (l c)', l = patch_len),
+            Rearrange("b ... c (n l) -> b ... n (l c)", l=patch_len),
             nn.Linear(self.patch_dim, d_model, bias=True),
             nn.ReLU(inplace=True),
             nn.Linear(d_model, d_model, bias=True),
         )
 
     def forward(self, x):
-        x = self.to_patch_embedding(x) # 128 * 32 * 128
-        return x 
-    
+        x = self.to_patch_embedding(x)  # 128 * 32 * 128
+        return x
+
 
 class SWPatchEncoder(nn.Module):
-    # Batch x Epoch x Trace x Channel x Time 
-    # Batch x Epoch x Trace x Channel x (Patch_num x Patch_len) 
+    # Batch x Epoch x Trace x Channel x Time
+    # Batch x Epoch x Trace x Channel x (Patch_num x Patch_len)
     # Batch x Epoch x Trace x Patch_num x (Channel x Patch_len)
 
     def __init__(self, patch_len=16, stride=8, in_channel=1, d_model=128, pad=True):
@@ -124,7 +124,7 @@ class SWPatchEncoder(nn.Module):
         self.padd_layer = nn.ReplicationPad1d((0, stride)) if pad else nn.Identity()
 
         self.patch_spliter = nn.Sequential(
-            Rearrange('b ... c t -> b ... (c t)'), 
+            Rearrange("b ... c t -> b ... (c t)"),
             self.padd_layer,
         )
 
@@ -137,5 +137,5 @@ class SWPatchEncoder(nn.Module):
     def forward(self, x):
         x = self.patch_spliter(x)
         x = x.unfold(dimension=-1, size=self.patch_dim, step=self.stride)
-        x = self.to_patch_embedding(x) # 128 * 32 * 128
-        return x 
+        x = self.to_patch_embedding(x)  # 128 * 32 * 128
+        return x
