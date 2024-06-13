@@ -23,7 +23,7 @@ data_path = "../sdreamer_output_data/seq/"
 checkpoints = "../sdreamer_checkpoints"
 
 # model save directory name
-des_name = "SeqHMoE_Seq_pl16_el2_cl1_f1_seql3_kl_2.0_t3.0"
+des_name = "2024-06-13"
 
 # hyperparameters
 activation = "glu"
@@ -43,7 +43,7 @@ config = dict(
     seed=42,
     is_training=1,
     model_id="test",
-    model="SeqHMoE",
+    model="SeqNewMoE2",
     data="Seq",
     isNE=False,
     fold=1,
@@ -136,7 +136,7 @@ print(args)
 Exp = Exp_MoE
 
 if args.is_training:
-    setting = "{}_{}_ft{}_pl{}_ns{}_dm{}_el{}_dff{}_eb{}_bs{}_f{}_{}".format(
+    setting = "{}_{}_ft{}_pl{}_ns{}_dm{}_el{}_dff{}_eb{}_scale{}_bs{}_f{}_{}".format(
         args.model,
         args.data,
         args.features,
@@ -146,6 +146,7 @@ if args.is_training:
         args.e_layers,
         args.d_ff,
         args.mix_type,
+        args.scale,
         args.batch_size,
         args.fold,
         args.des,
