@@ -18,12 +18,13 @@ from exp.exp_moe2 import Exp_MoE
 
 
 # specify the paths
-root_path = "../sdreamer_input_data/"
-data_path = "../sdreamer_output_data/seq/"
+root_path = ""
+#root_path = "../sdreamer_input_data/"
+data_path = "../sdreamer_output_data_augmented_10/seq/"
 checkpoints = "../sdreamer_checkpoints"
 
 # model save directory name
-des_name = "2024-06-13"
+des_name = "augment_10"
 
 # hyperparameters
 activation = "glu"
