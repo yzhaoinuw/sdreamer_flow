@@ -89,7 +89,7 @@ class Exp_MoE(object):
             #'NewMoE': NewMoE2,
             #'FreqCM': FreqCM,
             #'SeqNewMoE': n2nSeqNewMoE,
-            "SeqNewMoE2": n2nSeqNewMoE2,
+            "SeqNewMoE2": n2nSeqNewMoE2_crf,
             "SeqHMoE": n2nSeqHMoE,
         }
         if self.args.features == "ALL":
