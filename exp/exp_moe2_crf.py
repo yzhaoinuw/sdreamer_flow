@@ -178,7 +178,8 @@ class Exp_MoE(object):
                 cls_feats_eeg = out_dict["cls_feats_eeg"]
                 cls_feats_emg = out_dict["cls_feats_emg"]
                 targets = torch.ones(cls_feats.shape[0]).to(self.device)
-                loss1 = criterion(out, label.view(-1))
+                #loss1 = criterion(out, label.view(-1))
+                loss1 = out_dict["loss"]
                 # loss2 = criterion2(cls_feats, cls_feats_eeg, targets)
                 # loss3 = criterion2(cls_feats, cls_feats_emg, targets)
                 # loss_eeg = criterion(out_eeg, label.view(-1))
