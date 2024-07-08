@@ -136,12 +136,10 @@ class Model(nn.Module):
         logits_emg = self.cls_head_emg(infer_emg["cls_feats"])
 
         loss = 0
-        predictions = torch.Tensor([])
+        predictions = torch.FloatTensor(self.crf.decode(logits))
         if label is not None:
             loss = -self.crf(logits, torch.squeeze(label, dim=-1), mask=None)
             label = rearrange(label, "b e d -> (b e) d")
-        else:
-            predictions = torch.FloatTensor(self.crf.decode(logits))
 
         logits = rearrange(logits, "b e d -> (b e) d") 
         logits_eeg = rearrange(logits_eeg, "b e d -> (b e) d")
