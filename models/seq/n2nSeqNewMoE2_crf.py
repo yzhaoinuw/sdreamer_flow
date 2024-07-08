@@ -136,7 +136,7 @@ class Model(nn.Module):
         logits_emg = self.cls_head_emg(infer_emg["cls_feats"])
 
         loss = 0
-        
+        predictions = torch.Tensor([])
         if label is not None:
             loss = -self.crf(logits, torch.squeeze(label, dim=-1), mask=None)
             label = rearrange(label, "b e d -> (b e) d")
@@ -146,7 +146,7 @@ class Model(nn.Module):
         logits = rearrange(logits, "b e d -> (b e) d") 
         logits_eeg = rearrange(logits_eeg, "b e d -> (b e) d")
         logits_emg = rearrange(logits_emg, "b e d -> (b e) d")
-        predictions = torch.Tensor([])
+        
         out_dict = {
             "out": logits,
             "out_eeg": logits_eeg,
