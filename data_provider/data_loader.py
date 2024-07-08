@@ -422,7 +422,7 @@ class Seq_Loader(Dataset):
             self.train_traces = torch.cat([train_traces, train_norm], dim=3)
             self.val_traces = torch.cat([val_traces, val_norm], dim=3)
 
-            # after concat [N, 2, 2, 512]  the thrid dim include pre-normed and normed data
+            # after concat -> [N, n_sequence, 2, 2, 512]. the 4th dim include pre-normed and normed data
             # print(self.dst_path)
             np.save(
                 "{}train_trace{}.npy".format(self.dst_path, fold), self.train_traces
