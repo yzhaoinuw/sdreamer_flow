@@ -320,7 +320,8 @@ class Exp_MoE(object):
             loss = loss1 + (distill_eeg + distill_emg) * self.scale
             # loss = loss1
 
-            pred = np.argmax(out.detach().cpu(), axis=1)
+            #pred = np.argmax(out.detach().cpu(), axis=1) # shape [batch_size * n_seq]
+            pred = out_dict["predictions"]
             pred_eeg = np.argmax(out_eeg.detach().cpu(), axis=1)
             pred_emg = np.argmax(out_emg.detach().cpu(), axis=1)
             label = label.detach().cpu()
