@@ -17,15 +17,6 @@ from pytorch_lightning import seed_everything
 from exp.exp_moe2_crf import Exp_MoE
 
 
-# specify the paths
-root_path = ""
-#root_path = "../sdreamer_input_data/"
-data_path = "../sdreamer_output_data_augmented_10/seq/"
-checkpoints = "../sdreamer_checkpoints"
-
-# model save directory name
-des_name = "augment_10"
-
 # hyperparameters
 activation = "glu"
 norm_type = "layernorm"
@@ -48,8 +39,8 @@ config = dict(
     data="Seq",
     isNE=False,
     fold=1,
-    root_path=root_path,
-    data_path=data_path,
+    root_path="",
+    # data_path=data_path,
     features="ALL",
     n_sequences=n_sequences,
     useNorm=True,
@@ -94,67 +85,76 @@ config = dict(
     weight=[1, 1, 1],
     visualize_mode=[],
     visualizations="",
-    checkpoints=checkpoints,
+    # checkpoints=checkpoints,
     reload_best=True,
     reload_ckpt=None,
-    use_gpu=True,
+    # use_gpu=True,
     gpu=0,
     use_multi_gpu=False,
     test_flop=False,
     print_freq=50,
     # output_path=output_path,
     # ne_patch_len=ne_patch_len,
-    des=des_name,
+    # des=des_name,
     # pad=False,
 )
 
-parser = argparse.ArgumentParser(description="Transformer family for sleep scoring")
-args = parser.parse_args()
-print(args)
-parser_dict = vars(args)
+# %%
+if __name__ == "__main__":
+    # specify the paths
+    data_path = "../sdreamer_output_data_augmented_10/seq/"
+    checkpoints = "../sdreamer_checkpoints"  # model save directory name
+    des_name = "augment_10"  # suffix in the model name
 
-for k, v in config.items():
-    parser_dict[k] = v
+    parser = argparse.ArgumentParser(description="Transformer family for sleep scoring")
+    args = parser.parse_args()
 
-random.seed(args.seed)
-os.environ["PYTHONHASHSEED"] = str(args.seed)
-np.random.seed(args.seed)
-torch.manual_seed(args.seed)
-torch.cuda.manual_seed(args.seed)
-# torch.cuda.manual_seed_all(args.seed)  # if you are using multi-GPU.
-torch.backends.cudnn.benchmark = True
-torch.backends.cudnn.deterministic = True
-torch.backends.cudnn.enabled = True
-seed_everything(args.seed)
+    args.data_path = data_path
+    args.checkpoints = checkpoints
+    args.des_name = des_name
+    args.use_gpu = True if torch.cuda.is_available() and args.use_gpu else False
 
+    parser_dict = vars(args)
+    for k, v in config.items():
+        parser_dict[k] = v
 
-args.use_gpu = True if torch.cuda.is_available() and args.use_gpu else False
+    random.seed(args.seed)
+    os.environ["PYTHONHASHSEED"] = str(args.seed)
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
+    torch.cuda.manual_seed(args.seed)
+    # torch.cuda.manual_seed_all(args.seed)  # if you are using multi-GPU.
+    torch.backends.cudnn.benchmark = True
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.enabled = True
+    seed_everything(args.seed)
 
+    print("Args in experiment:")
+    print(args)
 
-print("Args in experiment:")
-print(args)
+    Exp = Exp_MoE
 
-Exp = Exp_MoE
+    if args.is_training:
+        setting = (
+            "{}_{}_ft{}_pl{}_ns{}_dm{}_el{}_dff{}_eb{}_scale{}_bs{}_f{}_{}".format(
+                args.model,
+                args.data,
+                args.features,
+                args.patch_len,
+                args.n_sequences,
+                args.d_model,
+                args.e_layers,
+                args.d_ff,
+                args.mix_type,
+                args.scale,
+                args.batch_size,
+                args.fold,
+                args.des_name,
+            )
+        )
 
-if args.is_training:
-    setting = "{}_{}_ft{}_pl{}_ns{}_dm{}_el{}_dff{}_eb{}_scale{}_bs{}_f{}_{}".format(
-        args.model,
-        args.data,
-        args.features,
-        args.patch_len,
-        args.n_sequences,
-        args.d_model,
-        args.e_layers,
-        args.d_ff,
-        args.mix_type,
-        args.scale,
-        args.batch_size,
-        args.fold,
-        args.des,
-    )
+        exp = Exp(args)  # set experiments
+        print(">>>>>>>>Start Training : {}>>>>>>>>>>>>>>>>>>>>>>>>>>".format(setting))
+        exp.run_train(setting)
 
-    exp = Exp(args)  # set experiments
-    print(">>>>>>>>Start Training : {}>>>>>>>>>>>>>>>>>>>>>>>>>>".format(setting))
-    exp.run_train(setting)
-
-    torch.cuda.empty_cache()
+        torch.cuda.empty_cache()

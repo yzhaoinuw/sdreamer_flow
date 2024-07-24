@@ -32,7 +32,7 @@ class Epoch_Loader(Dataset):
         data_path="data/dst_data/epoch/",
         isEval=False,
         fold=1,
-        n_sequcnes=1,
+        n_sequences=1,
         useNorm=False,
     ):
         self.root_path = root_path
@@ -161,7 +161,7 @@ class Item_Loader(Dataset):
         data_path="dst_data/epoch/",
         isEval=False,
         fold=1,
-        n_sequcnes=1,
+        n_sequences=1,
         useNorm=False,
     ):
         self.root_path = root_path
@@ -361,11 +361,11 @@ class Seq_Loader(Dataset):
         data_path="dst_data/seq/",
         isEval=False,
         fold=1,
-        n_sequcnes=1,
+        n_sequences=1,
         useNorm=False,
     ):
         self.root_path = root_path
-        self.dst_path = "{}n_seq_{}/fold_{}/".format(data_path, n_sequcnes, fold)
+        self.dst_path = "{}n_seq_{}/fold_{}/".format(data_path, n_sequences, fold)
 
         if not os.path.exists(self.dst_path):
             print(
@@ -394,7 +394,7 @@ class Seq_Loader(Dataset):
             train_norm_list = Seq_filter_func(train_norm_list, train_labels_list)
             train_labels_list = Seq_filter_func(train_labels_list, train_labels_list)
             train_data = Seq_slice_func(
-                train_traces_list, train_norm_list, train_labels_list, n_sequcnes
+                train_traces_list, train_norm_list, train_labels_list, n_sequences
             )
             train_traces = torch.cat([i[0] for i in train_data], dim=0).float()
             train_norm = torch.cat([i[1] for i in train_data], dim=0).float()
@@ -412,7 +412,7 @@ class Seq_Loader(Dataset):
             val_norm_list = Seq_filter_func(val_norm_list, val_labels_list)
             val_labels_list = Seq_filter_func(val_labels_list, val_labels_list)
             val_data = Seq_slice_func(
-                val_traces_list, val_norm_list, val_labels_list, n_sequcnes
+                val_traces_list, val_norm_list, val_labels_list, n_sequences
             )
             val_traces = torch.cat([i[0] for i in val_data], dim=0).float()
             val_norm = torch.cat([i[1] for i in val_data], dim=0).float()
@@ -493,7 +493,7 @@ class Epoch_Loader_NE(Dataset):
         data_path="data/dst_data_wNE/epoch/",
         isEval=False,
         fold=1,
-        n_sequcnes=1,
+        n_sequences=1,
         useNorm=False,
     ):
         self.root_path = root_path
@@ -667,11 +667,11 @@ class Seq_Loader_NE(Dataset):
         data_path="data/dst_data_wNE/seq/",
         isEval=False,
         fold=1,
-        n_sequcnes=16,
+        n_sequences=16,
         useNorm=False,
     ):
         self.root_path = root_path
-        self.dst_path = "{}n_seq_{}/fold_{}/".format(data_path, n_sequcnes, fold)
+        self.dst_path = "{}n_seq_{}/fold_{}/".format(data_path, n_sequences, fold)
         i = 0
         if not os.path.exists(self.dst_path):
             print(
@@ -721,7 +721,7 @@ class Seq_Loader_NE(Dataset):
                 train_norm_list,
                 train_norm_ne_list,
                 train_labels_list,
-                n_sequcnes,
+                n_sequences,
             )
             train_traces = torch.cat([i[0] for i in train_data], dim=0).float()
             train_ne = torch.cat([i[1] for i in train_data], dim=0).float()
@@ -759,7 +759,7 @@ class Seq_Loader_NE(Dataset):
                 val_norm_list,
                 val_norm_ne_list,
                 val_labels_list,
-                n_sequcnes,
+                n_sequences,
             )
             val_traces = torch.cat([i[0] for i in val_data], dim=0).float()
             val_ne = torch.cat([i[1] for i in val_data], dim=0).float()
@@ -835,6 +835,3 @@ class Seq_Loader_NE(Dataset):
         ne = self.ne[idx]
         label = self.labels[idx]
         return trace, ne, label
-
-
-# Seq_Loader_NE = Seq_Loader_NE(fold=1, isEval=False, useNorm=True, n_sequcnes=16)

@@ -96,9 +96,11 @@ class Exp_MoE(object):
             "MIX": MixTransformer,
             "MoE": MoETransformer if self.args.data == "Epoch" else n2nSeqMoE,
             "Macaron": MacaronTransformer if self.args.data == "Epoch" else None,
-            "Macross": MacrossTransformer
-            if self.args.data == "Epoch"
-            else n2nMacrossTransformer,
+            "Macross": (
+                MacrossTransformer
+                if self.args.data == "Epoch"
+                else n2nMacrossTransformer
+            ),
             "CNN-ViTsh": CNNViTTransformer if self.args.data == "Epoch" else None,
             "Multicross": CMTransformer,
             "Freq": FreqTransformer,

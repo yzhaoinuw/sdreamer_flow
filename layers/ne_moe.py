@@ -102,9 +102,11 @@ class MoELoader(nn.Module):
             mod = True
 
         patch_mapper = {
-            "time": PatchEncoder(patch_len, c_in, inner_dim)
-            if feat_type != "NE"
-            else SWPatchEncoder(patch_len, patch_len, c_in, inner_dim, pad=True),
+            "time": (
+                PatchEncoder(patch_len, c_in, inner_dim)
+                if feat_type != "NE"
+                else SWPatchEncoder(patch_len, patch_len, c_in, inner_dim, pad=True)
+            ),
             "freq": nn.Linear(129, inner_dim),
         }
         self.get_cls = (

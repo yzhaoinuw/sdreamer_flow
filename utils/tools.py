@@ -1,6 +1,5 @@
 import os
 import shutil
-import numpy as np
 import torch
 
 
@@ -59,9 +58,11 @@ class EarlyStopping:
             {
                 "epoch": epoch,
                 "model": args.model,
-                "state_dict": model.state_dict()
-                if not isinstance(model, torch.nn.DataParallel)
-                else model.module.state_dict(),
+                "state_dict": (
+                    model.state_dict()
+                    if not isinstance(model, torch.nn.DataParallel)
+                    else model.module.state_dict()
+                ),
                 "best_acc": self.best_acc,
                 "optimizer": optimizer.state_dict(),
             },

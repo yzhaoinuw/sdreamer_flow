@@ -178,7 +178,7 @@ class Exp_MoE(object):
                 cls_feats_eeg = out_dict["cls_feats_eeg"]
                 cls_feats_emg = out_dict["cls_feats_emg"]
                 targets = torch.ones(cls_feats.shape[0]).to(self.device)
-                #loss1 = criterion(out, label.view(-1))
+                # loss1 = criterion(out, label.view(-1))
                 loss1 = out_dict["loss"]
                 # loss2 = criterion2(cls_feats, cls_feats_eeg, targets)
                 # loss3 = criterion2(cls_feats, cls_feats_emg, targets)
@@ -187,10 +187,10 @@ class Exp_MoE(object):
 
                 # distill_eeg = criterion3(F.log_softmax(out, dim=1), F.softmax(out_eeg, dim=1))
                 # distill_emg = criterion3(F.log_softmax(out, dim=1), F.softmax(out_emg, dim=1))
-                #loss = loss1 + (distill_eeg + distill_emg) * self.scale
+                # loss = loss1 + (distill_eeg + distill_emg) * self.scale
                 pred = out_dict["predictions"]
                 pred = pred.detach().cpu()
-                #pred = np.argmax(out.detach().cpu(), axis=1)
+                # pred = np.argmax(out.detach().cpu(), axis=1)
                 pred_eeg = np.argmax(out_eeg.detach().cpu(), axis=1)
                 pred_emg = np.argmax(out_emg.detach().cpu(), axis=1)
 
@@ -303,7 +303,7 @@ class Exp_MoE(object):
             cls_feats_eeg = out_dict["cls_feats_eeg"]
             cls_feats_emg = out_dict["cls_feats_emg"]
             targets = torch.ones(cls_feats.shape[0]).to(self.device)
-            #loss1 = criterion(out, label.view(-1))
+            # loss1 = criterion(out, label.view(-1))
             loss1 = loss
             # loss2 = criterion(out_eeg)
             # loss2 = criterion2(cls_feats, cls_feats_eeg, targets)
@@ -320,7 +320,7 @@ class Exp_MoE(object):
             loss = loss1 + (distill_eeg + distill_emg) * self.scale
             # loss = loss1
 
-            #pred = np.argmax(out.detach().cpu(), axis=1) # shape [batch_size * n_seq]
+            # pred = np.argmax(out.detach().cpu(), axis=1) # shape [batch_size * n_seq]
             pred = out_dict["predictions"]
             pred_eeg = np.argmax(out_eeg.detach().cpu(), axis=1)
             pred_emg = np.argmax(out_emg.detach().cpu(), axis=1)
@@ -410,7 +410,7 @@ class Exp_MoE(object):
 
         train_data, train_loader = self._get_data(flag="train")
         val_data, val_loader = self._get_data(flag="val")
-        #visualize_data, visualize_loader = self._get_visualize_data()
+        # visualize_data, visualize_loader = self._get_visualize_data()
 
         train_steps = len(train_loader)
         early_stopping = EarlyStopping(patience=self.args.patience, verbose=True)
@@ -455,7 +455,7 @@ class Exp_MoE(object):
                 print("Early stopping at epoch {} ...".format(epoch))
                 break
 
-        #self.run_train_visualize(setting, visualize_loader)
+        # self.run_train_visualize(setting, visualize_loader)
 
     def run_eval_visualize(self, setting):
         visualize_data, visualize_loader = self._get_visualize_data()
