@@ -109,15 +109,14 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Transformer family for sleep scoring")
     args = parser.parse_args()
+    parser_dict = vars(args)
+    for k, v in config.items():
+        parser_dict[k] = v
 
     args.data_path = data_path
     args.checkpoints = checkpoints
     args.des_name = des_name
     args.use_gpu = True if torch.cuda.is_available() and args.use_gpu else False
-
-    parser_dict = vars(args)
-    for k, v in config.items():
-        parser_dict[k] = v
 
     random.seed(args.seed)
     os.environ["PYTHONHASHSEED"] = str(args.seed)
