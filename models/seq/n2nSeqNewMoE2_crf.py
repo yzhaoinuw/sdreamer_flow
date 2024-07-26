@@ -128,7 +128,9 @@ class Model(nn.Module):
         # x_our --> [b, n, 2d]
 
         infer = self.moe_transformer.infer(cls_eeg, cls_emg)
-        logits = self.cls_head(infer["cls_feats"]) # shape [batch_size, n_seq, num_classes]
+        logits = self.cls_head(
+            infer["cls_feats"]
+        )  # shape [batch_size, n_seq, num_classes]
         infer_eeg = self.moe_transformer.infer_eeg(cls_eeg)
         infer_emg = self.moe_transformer.infer_emg(cls_emg)
 
@@ -139,13 +141,15 @@ class Model(nn.Module):
         if label is not None:
             loss = -self.crf(logits, torch.squeeze(label, dim=-1), mask=None)
             label = rearrange(label, "b e d -> (b e) d")
-            
+
         predictions = torch.FloatTensor(self.crf.decode(logits))
         predictions = predictions.flatten()
-        logits = rearrange(logits, "b e d -> (b e) d") # shape [batch_size * n_seq, num_classes]
+        logits = rearrange(
+            logits, "b e d -> (b e) d"
+        )  # shape [batch_size * n_seq, num_classes]
         logits_eeg = rearrange(logits_eeg, "b e d -> (b e) d")
         logits_emg = rearrange(logits_emg, "b e d -> (b e) d")
-        
+
         out_dict = {
             "out": logits,
             "out_eeg": logits_eeg,
@@ -156,6 +160,6 @@ class Model(nn.Module):
             "raw_cls_feats": infer["raw_cls_feats"],
             "label": label,
             "loss": loss,
-            "predictions": predictions
+            "predictions": predictions,
         }
         return out_dict

@@ -8,6 +8,7 @@ Created on Tue May 14 23:28:55 2024
 
 import os
 import random
+import logging
 import argparse
 
 import torch
@@ -102,9 +103,9 @@ config = dict(
 # %%
 if __name__ == "__main__":
     # specify the paths
-    data_path = "../sdreamer_output_data_augmented_10/seq/"
-    checkpoints = "../sdreamer_checkpoints"  # model save directory name
-    des_name = "augment_10"  # suffix in the model name
+    data_path = "../sdreamer_data/"
+    checkpoints = "../sdreamer_checkpoints/"  # model save directory name
+    des_name = "test"  # suffix in the model name
 
     parser = argparse.ArgumentParser(description="Transformer family for sleep scoring")
     args = parser.parse_args()
@@ -153,8 +154,26 @@ if __name__ == "__main__":
             )
         )
 
+        logger = logging.getLogger("logger")
+        logging.getLogger().setLevel(logging.DEBUG)
+        file_handler = logging.FileHandler(
+            filename=os.path.join(checkpoints, f"{setting}.log"), mode="w"
+        )
+        logger.addHandler(file_handler)
+
+        logging.getLogger("logger").info("Args in experiment:\n")
+        logging.getLogger("logger").info(args)
+
         exp = Exp(args)  # set experiments
         print(">>>>>>>>Start Training : {}>>>>>>>>>>>>>>>>>>>>>>>>>>".format(setting))
+        logging.getLogger("logger").info(
+            f">>>>>>>>Start Training : {setting}>>>>>>>>>>>>>>>>>>>>>>>>>>"
+        )
         exp.run_train(setting)
 
         torch.cuda.empty_cache()
+
+        handlers = logger.handlers
+        for handler in handlers:
+            logger.removeHandler(handler)
+            handler.close()

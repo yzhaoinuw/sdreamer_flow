@@ -1,11 +1,14 @@
-from enum import Enum
-import os
-import shutil
-import numpy as np
+# import os
+# import shutil
+import logging
+
 import torch
-from torch.autograd import Variable
-from sklearn.metrics import cohen_kappa_score
+import numpy as np
+from enum import Enum
 import matplotlib.pyplot as plt
+
+# from torch.autograd import Variable
+from sklearn.metrics import cohen_kappa_score
 
 
 def accuracy(label, pred):
@@ -281,11 +284,13 @@ class ProgressMeter(object):
         entries = [self.prefix + self.batch_fmtstr.format(batch)]
         entries += [str(meter) for meter in self.meters]
         print(" ".join(entries))
+        logging.getLogger("logger").info(" ".join(entries))
 
     def display_summary(self):
         entries = [self.prefix + " *"]
         entries += [meter.summary() for meter in self.meters]
         print(" ".join(entries))
+        logging.getLogger("logger").info(" ".join(entries))
 
     def _get_batch_fmtstr(self, num_batches):
         num_digits = len(str(num_batches // 1))

@@ -1,5 +1,7 @@
 import os
 import shutil
+import logging
+
 import torch
 
 
@@ -10,6 +12,7 @@ def save_checkpoint(state, is_best, exp_dir, filename="ckpt.pth.tar"):
         best_name = os.path.join(exp_dir, "model_best.pth.tar")
         shutil.copyfile(ckpt_name, best_name)
         print("=> saving new best Acc model =========>")
+        logging.getLogger("logger").info("=> saving new best Acc model =========>")
 
 
 def load_checkpoint(
@@ -21,11 +24,17 @@ def load_checkpoint(
         reload_ckpt = os.path.join(exp_dir, filename)
     if os.path.isfile(reload_ckpt):
         print("=> loading checkpoint '{}'".format(reload_ckpt))
+        logging.getLogger("logger").info(f"=> loading checkpoint '{reload_ckpt}'")
         checkpoint = torch.load(reload_ckpt, map_location=device)
+        epoch = checkpoint["epoch"]
+        best_acc = checkpoint["best_acc"]
         print(
             "=> loaded checkpoint '{}' (epoch {} bestAcc {}))".format(
                 reload_ckpt, checkpoint["epoch"], checkpoint["best_acc"]
             )
+        )
+        logging.getLogger("logger").info(
+            f"=> loaded checkpoint '{reload_ckpt}' (epoch {epoch} bestAcc {best_acc}))"
         )
         return checkpoint
     else:
@@ -48,6 +57,9 @@ class EarlyStopping:
         if not is_best:
             self.counter += 1
             print(f"EarlyStopping counter: {self.counter} out of {self.patience}")
+            logging.getLogger("logger").info(
+                f"EarlyStopping counter: {self.counter} out of {self.patience}"
+            )
             if self.counter >= self.patience:
                 self.early_stop = True
         else:

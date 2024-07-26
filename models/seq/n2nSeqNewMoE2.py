@@ -126,14 +126,16 @@ class Model(nn.Module):
         # x_our --> [b, n, 2d]
 
         infer = self.moe_transformer.infer(cls_eeg, cls_emg)
-        logits = self.cls_head(infer["cls_feats"]) # shape [batch_size, n_seq, num_classes]
+        logits = self.cls_head(
+            infer["cls_feats"]
+        )  # shape [batch_size, n_seq, num_classes]
         infer_eeg = self.moe_transformer.infer_eeg(cls_eeg)
         infer_emg = self.moe_transformer.infer_emg(cls_emg)
 
         logits_eeg = self.cls_head_eeg(infer_eeg["cls_feats"])
         logits_emg = self.cls_head_emg(infer_emg["cls_feats"])
 
-        logits = rearrange(logits, "b e d -> (b e) d") 
+        logits = rearrange(logits, "b e d -> (b e) d")
         logits_eeg = rearrange(logits_eeg, "b e d -> (b e) d")
         logits_emg = rearrange(logits_emg, "b e d -> (b e) d")
         if label is not None:

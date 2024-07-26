@@ -81,7 +81,9 @@ def prepare_data(mat_file, seq_len=64, augment=False, upsampling_scale=10):
     return sliced_data, sliced_sleep_scores
 
 
-def write_data(data_path, save_path, on_hold_list=[], fold=1, upsampling_scale=10):
+def write_data(
+    data_path, save_path, on_hold_list=[], fold=1, seq_len=64, upsampling_scale=10
+):
     mat_list = []
     for file in os.listdir(data_path):
         if not file.endswith(".mat") or file in on_hold_list:
@@ -112,7 +114,7 @@ def write_data(data_path, save_path, on_hold_list=[], fold=1, upsampling_scale=1
         train_file_list.append(file_name)
         mat_file = os.path.join(data_path, file)
         sliced_data, sliced_sleep_scores = prepare_data(
-            mat_file, augment=False, upsampling_scale=upsampling_scale
+            mat_file, seq_len=seq_len, augment=False, upsampling_scale=upsampling_scale
         )
         train_data.append(sliced_data)
         train_labels.append(sliced_sleep_scores)
@@ -146,7 +148,10 @@ def write_data(data_path, save_path, on_hold_list=[], fold=1, upsampling_scale=1
 # %%
 if __name__ == "__main__":
     data_path = "C:/Users/yzhao/python_projects/time_series/data"  # path to the preprocessed data, ie., the .mat files
-    save_path = "C:/Users/yzhao/python_projects/time_series/sdreamer_data/"  # where you want to save the train and val data
+    fold = 1  # don't need to change it
+    seq_len = 64  # don't need to change it
+    save_path = f"C:/Users/yzhao/python_projects/time_series/sdreamer_data/n_seq_{seq_len}/fold_{fold}"  # where you want to save the train and val data
+    # exclude files if needed
     on_hold_list = set(
         [
             "aud_392.mat",
@@ -156,4 +161,6 @@ if __name__ == "__main__":
         ]
     )
 
-    train_file_list, val_file_list = write_data(data_path, save_path, on_hold_list)
+    train_file_list, val_file_list = write_data(
+        data_path, save_path, on_hold_list, fold=fold
+    )

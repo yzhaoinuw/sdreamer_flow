@@ -1,14 +1,16 @@
-from sklearn.model_selection import KFold
-import torch
-from torchvision import transforms, datasets
-import numpy as np
-from pathlib import Path
-from torch.utils import data
-from torch.utils.data import Dataset, DataLoader
 import os
+import logging
 from glob import glob
-import os
-import matplotlib.pyplot as plt
+
+import torch
+import numpy as np
+from sklearn.model_selection import KFold
+from torch.utils.data import Dataset, DataLoader
+
+# from torchvision import transforms, datasets
+# from pathlib import Path
+# from torch.utils import data
+# import matplotlib.pyplot as plt
 
 
 def file2tensor(file_path, norm=False, isLabel=False):
@@ -173,6 +175,9 @@ class Item_Loader(Dataset):
                     fold
                 )
             )
+            logging.getLogger("logger").info(
+                f">>>>>>>>Starting Processing and Splitting Raw Data Fold{fold}<<<<<<<<<<<<<<<<<<<"
+            )
             os.makedirs(self.dst_path)
             # os.system("rm -rf {}".format(self.dst_dir))
             trace_files = sorted(glob(self.root_path + "*data.npy"))
@@ -183,6 +188,8 @@ class Item_Loader(Dataset):
             train_idxs, val_idxs = fold_idxs[fold - 1]  # Label of fold start from one
             print("Train_idxs: ", train_idxs)
             print("Val_idxs: ", val_idxs)
+            logging.getLogger("logger").info("Train_idxs: ", train_idxs)
+            logging.getLogger("logger").info("Val_idxs: ", val_idxs)
 
             val_traces = [file2tensor(trace_files[idx]).float() for idx in val_idxs]
             val_norm = [
@@ -213,6 +220,9 @@ class Item_Loader(Dataset):
 
         else:
             print(">>>>>>>>>Loading Existing Fold{}<<<<<<<<<<<<<<<<<<<<<<".format(fold))
+            logging.getLogger("logger").info(
+                f">>>>>>>>>Loading Existing Fold{fold}<<<<<<<<<<<<<<<<<<<<<<"
+            )
             # self.train_traces = torch.from_numpy(np.load('{}train_trace{}.npy'.format(self.dst_path, fold), allow_pickle=True))
             # self.train_labels = torch.from_numpy(np.load('{}train_label{}.npy'.format(self.dst_path, fold), allow_pickle=True))
             self.val_traces = torch.from_numpy(
@@ -373,6 +383,9 @@ class Seq_Loader(Dataset):
                     fold
                 )
             )
+            logging.getLogger("logger").info(
+                f">>>>>>>>Starting Processing and Splitting Raw Data Fold{fold}<<<<<<<<<<<<<<<<<<<"
+            )
             os.makedirs(self.dst_path)
             # os.system("rm -rf {}".format(self.dst_path))
             trace_files = sorted(glob(self.root_path + "*data.npy"))
@@ -435,6 +448,9 @@ class Seq_Loader(Dataset):
 
         else:
             print(">>>>>>>>>Loading Existing Fold{}<<<<<<<<<<<<<<<<<<<<<<".format(fold))
+            logging.getLogger("logger").info(
+                f">>>>>>>>>Loading Existing Fold{fold}<<<<<<<<<<<<<<<<<<<<<<"
+            )
             self.train_traces = torch.from_numpy(
                 np.load(
                     "{}train_trace{}.npy".format(self.dst_path, fold), allow_pickle=True
