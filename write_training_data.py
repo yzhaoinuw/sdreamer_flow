@@ -115,12 +115,12 @@ def write_data(
     train_file_list = []
     val_file_list = []
     for train_ind in train_indices:
-        file_name = mat_list[train_ind]
-        print(file_name)
-        train_file_list.append(file_name)
-        mat_file = os.path.join(data_path, file)
+        train_file_name = mat_list[train_ind]
+        print(train_file_name)
+        train_file_list.append(train_file_name)
+        train_mat_file = os.path.join(data_path, train_file_name)
         sliced_data, sliced_sleep_scores = prepare_data(
-            mat_file,
+            train_mat_file,
             seq_len=seq_len,
             augment=augment,
             upsampling_scale=upsampling_scale,
@@ -139,11 +139,11 @@ def write_data(
     print("saved train.")
 
     for val_ind in val_indices:
-        file_name = mat_list[val_ind]
-        print(file_name)
-        val_file_list.append(file_name)
-        mat_file = os.path.join(data_path, file)
-        sliced_data, sliced_sleep_scores = prepare_data(mat_file)
+        val_file_name = mat_list[val_ind]
+        print(val_file_name)
+        val_file_list.append(val_file_name)
+        val_mat_file = os.path.join(data_path, val_file_name)
+        sliced_data, sliced_sleep_scores = prepare_data(val_mat_file)
         val_data.append(sliced_data)
         val_labels.append(sliced_sleep_scores)
 
@@ -173,3 +173,6 @@ if __name__ == "__main__":
     train_file_list, val_file_list = write_data(
         data_path, save_path, on_hold_list, fold=fold
     )
+    with open(os.path.join(save_path, "train_val_split.txt"), "w") as outfile1:
+        outfile1.write("\n".join(['## train_list'] + train_file_list + ['\n'] + ['## val_list'] + val_file_list))
+        

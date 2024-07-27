@@ -15,7 +15,7 @@ import torch
 import numpy as np
 from pytorch_lightning import seed_everything
 
-from exp.exp_moe2_crf import Exp_MoE
+from exp.exp_moe2 import Exp_MoE
 
 
 # hyperparameters
