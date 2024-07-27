@@ -1,4 +1,4 @@
-from utils.metrics import AverageMeter, ProgressMeter
+from utils.metrics import AverageMeter
 
 
 def batch_updater(metric_list, meter_list, batch_size):

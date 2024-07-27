@@ -1,3 +1,18 @@
+import os
+import time
+import logging
+import warnings
+import matplotlib.pyplot as plt
+
+import numpy as np
+import torch
+import torch.nn as nn
+
+# from torch import optim
+import torch.nn.functional as F
+
+# from torch.optim import lr_scheduler
+# import matplotlib.patches as mpatches
 from sklearn.metrics import (
     f1_score,
     accuracy_score,
@@ -5,19 +20,9 @@ from sklearn.metrics import (
     recall_score,
     cohen_kappa_score,
 )
-from data_provider.data_generator import data_generator, visualize_data_generator
 
-# from exp.exp_basic import Exp_Basic
-# from models.epoch import  (CMTransformer, ViTTransformer, CMATransformer, monoViT, CNNViTTransformer, MacaronTransformer, \
-# MixTransformer, MacrossTransformer, MoETransformer, FreqTransformer, BaseLine, CMTransformer, TFTransformer, TFCMTransformer, SMoETransformer, \
-# SimMoE, FreqCM, NewMoE, NewMoE2)
-# from models.seq import n2nViTTransformer, n2nCMATransformer, n2nMacrossTransformer,n2nMoETransformer, \
-# n2nBaseLine, n2nSeqCM, n2nCMTransformer,n2nSeqMoE, n2nSeqNewMoE, n2nSeqNewMoE2, n2nSeqHMoE
-from models.seq import n2nSeqNewMoE2, n2nSeqHMoE
-
-# from utils.tools import EarlyStopping, adjust_learning_rate, visual, test_params_flop
 from utils.metrics import ProgressMeter
-from utils.metric_tracker import batch_updater, build_tracker_mome
+from utils.metric_tracker import build_tracker_mome
 from utils.optimization import load_optimizer, load_scheduler
 from utils.tools import EarlyStopping, load_checkpoint
 from utils.visualize import (
@@ -27,21 +32,8 @@ from utils.visualize import (
     visualize_attn,
     visualize_tsne_seq,
 )
-import matplotlib.patches as mpatches
-
-import numpy as np
-import torch
-import torch.nn as nn
-from torch import optim
-import torch.nn.functional as F
-from torch.optim import lr_scheduler
-
-import os
-import time
-
-import warnings
-import matplotlib.pyplot as plt
-import numpy as np
+from models.seq import n2nSeqNewMoE2, n2nSeqHMoE
+from data_provider.data_generator import data_generator, visualize_data_generator
 
 warnings.filterwarnings("ignore")
 
@@ -432,11 +424,13 @@ class Exp_MoE(object):
                 self.args,
             )
             print("\n")
+            logging.getLogger("logger").info("\n")
 
             acc = self.eval(
                 val_loader, self.model, criterion, criterion2, criterion3, self.args
             )
             print("\n")
+            logging.getLogger("logger").info("\n")
 
             early_stopping(
                 args=self.args,
@@ -449,6 +443,7 @@ class Exp_MoE(object):
 
             if early_stopping.early_stop:
                 print("Early stopping at epoch {} ...".format(epoch))
+                logging.getLogger("logger").info(f"Early stopping at epoch {epoch} ...")
                 break
 
         # self.run_train_visualize(setting, visualize_loader)

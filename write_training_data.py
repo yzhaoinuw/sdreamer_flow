@@ -82,7 +82,13 @@ def prepare_data(mat_file, seq_len=64, augment=False, upsampling_scale=10):
 
 
 def write_data(
-    data_path, save_path, on_hold_list=[], fold=1, seq_len=64, upsampling_scale=10
+    data_path,
+    save_path,
+    on_hold_list=[],
+    fold=1,
+    seq_len=64,
+    augment=False,
+    upsampling_scale=10,
 ):
     mat_list = []
     for file in os.listdir(data_path):
@@ -114,7 +120,10 @@ def write_data(
         train_file_list.append(file_name)
         mat_file = os.path.join(data_path, file)
         sliced_data, sliced_sleep_scores = prepare_data(
-            mat_file, seq_len=seq_len, augment=False, upsampling_scale=upsampling_scale
+            mat_file,
+            seq_len=seq_len,
+            augment=augment,
+            upsampling_scale=upsampling_scale,
         )
         train_data.append(sliced_data)
         train_labels.append(sliced_sleep_scores)
