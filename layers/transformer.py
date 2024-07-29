@@ -1,10 +1,7 @@
-from inspect import isfunction
-import math
 import torch
-import torch.nn.functional as F
-from torch import nn, einsum
-from einops import rearrange, repeat
-from einops.layers.torch import Rearrange
+from torch import nn
+from einops import repeat
+
 from layers.patchEncoder import PatchEncoder, SWPatchEncoder
 from layers.attention import (
     MultiHeadAttention,
@@ -12,7 +9,7 @@ from layers.attention import (
     MoEBlock,
     MultiHeadCrossAttention2,
 )
-from timm.models.layers import DropPath, to_2tuple, trunc_normal_
+from timm.models.layers import trunc_normal_
 from layers.head import Pooler, SeqPooler, SeqPooler2
 
 

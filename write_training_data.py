@@ -156,9 +156,9 @@ def write_data(
 
 # %%
 if __name__ == "__main__":
+    seq_len = 64  # don't change
+    fold = 1  # don't change
     data_path = "C:/Users/yzhao/python_projects/time_series/data"  # path to the preprocessed data, ie., the .mat files
-    fold = 1  # don't need to change it
-    seq_len = 64  # don't need to change it
     save_path = f"C:/Users/yzhao/python_projects/time_series/sdreamer_data/n_seq_{seq_len}/fold_{fold}"  # where you want to save the train and val data
     # exclude files if needed
     on_hold_list = set(
@@ -174,5 +174,12 @@ if __name__ == "__main__":
         data_path, save_path, on_hold_list, fold=fold
     )
     with open(os.path.join(save_path, "train_val_split.txt"), "w") as outfile1:
-        outfile1.write("\n".join(['## train_list'] + train_file_list + ['\n'] + ['## val_list'] + val_file_list))
-        
+        outfile1.write(
+            "\n".join(
+                ["## train_list"]
+                + train_file_list
+                + ["\n"]
+                + ["## val_list"]
+                + val_file_list
+            )
+        )

@@ -1,25 +1,11 @@
-from inspect import isfunction
-import math
-import torch
-import torch.nn.functional as F
-from torch import nn, einsum
-from einops import rearrange, repeat
-from einops.layers.torch import Rearrange
-from layers.attention import MultiHeadAttention
-from layers.Freqtransform import STFT
-from layers.patchEncoder import LinearPatchEncoder, LinearPatchEncoder2
+from torch import nn
+from einops import rearrange
+
 from layers.transformer import (
     Transformer,
-    MoETransformer,
-    SeqNewMoETransformer,
     SeqNewMoETransformer2,
 )
-from layers.norm import PreNorm
-from layers.head import Pooler, cls_head
-
-import librosa
-import numpy as np
-from timm.models.layers import DropPath, to_2tuple, trunc_normal_
+from layers.head import cls_head
 
 
 class Model(nn.Module):

@@ -1,10 +1,67 @@
 ## Training
-follow run_train_sdreamer.py
+Follow the three steps listed below, in order, to train a sDREAMER model on your data.
 
-To prepare for the training dataset, follow write_data_sdreamer.py
+### 1. Data files
+Each data file must be a .mat file which contains the following field: `emg` (array), `eeg` (array), `eeg_frequency` (float). EMG is assumed to be sampled at the same frequency as EEG, so that's why only `eeg_frequency` is needed. In addition, they are assumed to have the same duration. `eeg_frequency` must be the exact sampling rate or as precise as possible. Do not round it. In the next step, the rounding will be taken care of for you. If you round it now, it will result in misalignment in the sleep score prediction, especially for longer recordings. Please contact me if your data is in any way different from what's assumed here. We should be able to customize training pipeline to make it work for your data.   
+
+### 2. Preparing the dataset
+To prepare for the training dataset, run *write_training_data.py*. Change the code inside `if __name__ == "__main__":` as needed. Typically, you only need to change 1) `data_path ` to where you placed your preprocessed mat files, 2) `save_path ` to where you want to save the training and validation dataset, and 3) `on_hold_list` to include any files that you need to exclude (for reasons such as incomplete labels or corrupt data). See the relevant code snippet below. Once you specify these three parameters, *write_training_data.py* will turn the preprocessed data to train and validation set that's ready to be fed to the model. In addition, it will also write a list of tain-validation files, called  *train_val_split.txt*, in `save_path`. 
+```python
+if __name__ == "__main__":
+    seq_len = 64  # don't change
+    fold = 1  # don't change
+    data_path = "C:/Users/yzhao/python_projects/time_series/data"  # path to the preprocessed data, ie., the .mat files
+    save_path = f"C:/Users/yzhao/python_projects/time_series/sdreamer_data/n_seq_{seq_len}/fold_{fold}"  # where you want to save the train and val data
+    # exclude files if needed
+    on_hold_list = set(
+        [
+            "aud_392.mat",
+            "aud_420.mat",
+            "chr2_590_freq.mat",
+            "sal_600.mat",
+        ]
+    )
+
+    train_file_list, val_file_list = write_data(
+        data_path, save_path, on_hold_list, fold=fold
+    )
+    with open(os.path.join(save_path, "train_val_split.txt"), "w") as outfile1:
+        outfile1.write(
+            "\n".join(
+                ["## train_list"]
+                + train_file_list
+                + ["\n"]
+                + ["## val_list"]
+                + val_file_list
+            )
+        )
+```
+
+### 3. Train the sDREAMER model
+Run *run_train_sdreamer.py* after you have prepared the dataset in the previous step. Similar to the previous step, change the first few lines of code inside `if __name__ == "__main__":` as needed. See the relevant code snippet below. You only need to specify three parameters, 1) `data_path`, which should point to the path where you **save** the path in the previous step, 2) `checkpoints`, where you want to save the model weights, ie,. the checkpoints, and 3) `des`, which is a suffix in the saved model checkpoint name that helps you identify the models you've trained. Note that the `data_path` here refers to the path at which you saved the training and validation dataset in the previous step, NOT the preprocessed mat files. `des` is helpful when you may train several sDREAMER models at different time (perhaps after you have acquired more data), then you can use the date as the suffix. When no "des" is given, the model will be automatically assigned a name which includes some important hyperparameters of the model, which looks like *SeqNewMoE2_Seq_ftALL_pl16_ns64_dm128_el2_dff512_eb0_scale0.0_bs64_f1*. But you don't need to worry about theses when you train your first model. Just leave everything else untouched and use the default hyperparameters that are already set for you. When the need arises, you can explore different hyperparamters or config.
+
+```python
+if __name__ == "__main__":
+    # specify the paths
+    data_path = "../sdreamer_data/"
+    checkpoints = "../sdreamer_checkpoints/"  # model save directory name
+    des_name = "test"  # suffix in the model name
+```
+
+## Inference
+To use a trained model to run inference on a mat file, run *run_inference.py*. See the relevant code snippet below. You can also import the function `infer()` from this file and create your inference script. 
+```python
+if __name__ == "__main__":
+    from scipy.io import loadmat
+
+    checkpoint_path = 'C:/Users/yzhao/python_projects/sleep_scoring/models/sdreamer/checkpoints/SeqNewMoE2_Seq_ftALL_pl16_ns64_dm128_el2_dff512_eb0_scale0.0_bs64_f1_augment_10.pth.tar'
+    mat_file = "C:/Users/yzhao/python_projects/sleep_scoring/user_test_files/sal_588.mat"
+    data = loadmat(mat_file)
+    all_pred, all_prob = infer(data, checkpoint_path)
+```
 
 ## Citing sDREAMER
-Please cite [the paper below](https://www.cs.rochester.edu/u/yyao39/files/sDREAMER.pdf) when you use sDREAMER
+Please cite [the paper below](https://www.cs.rochester.edu/u/yyao39/files/sDREAMER.pdf) when you use sDREAMER in your paper.
 ```
 @INPROCEEDINGS{10224751,
   author={Chen, Jingyuan and Yao, Yuan and Anderson, Mie and Hauglund, Natalie and Kjaerby, Celia and Untiet, Verena and Nedergaard, Maiken and Luo, Jiebo},
@@ -18,10 +75,9 @@ Please cite [the paper below](https://www.cs.rochester.edu/u/yyao39/files/sDREAM
   doi={10.1109/ICDH60066.2023.00028}}
 ```
 
-# Original README below
-# Flow
-
-# File Structure
+## Original README below
+### Flow
+### File Structure
 ```bash
 ├── README.md
 ├── data
@@ -71,3 +127,4 @@ Please cite [the paper below](https://www.cs.rochester.edu/u/yyao39/files/sDREAM
 ├── train_Launch.py --> used to train non-MoE models wo NE(1st version)
 └── train_LaunchNE.py --> used to train non-MoE models with NE(2nd version)
 ```
+

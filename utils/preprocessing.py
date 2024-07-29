@@ -14,30 +14,9 @@ from scipy import signal
 from scipy.io import loadmat
 
 
-def trim_missing_labels(filt, trim="b"):
-    first = 0
-    trim = trim.upper()
-    if "F" in trim:
-        for i in filt:
-            if i == -1 or np.isnan(i):
-                first = first + 1
-            else:
-                break
-    last = len(filt)
-    if "B" in trim:
-        for i in filt[::-1]:
-            if i == -1 or np.isnan(i):
-                last = last - 1
-            else:
-                break
-    return filt[first:last]
-
-
 def reshape_sleep_data(mat, segment_size=512, standardize=False):
     eeg = mat["eeg"].flatten()
     emg = mat["emg"].flatten()
-    sleep_scores = mat["sleep_scores"].flatten()
-    sleep_scores = trim_missing_labels(sleep_scores, trim="b")  # trim trailing zeros
 
     if standardize:
         eeg = stats.zscore(eeg)
@@ -69,11 +48,11 @@ def reshape_sleep_data(mat, segment_size=512, standardize=False):
 
     eeg_reshaped = eeg[indices]
     emg_reshaped = emg[indices]
-    return eeg_reshaped, emg_reshaped, sleep_scores
+    return eeg_reshaped, emg_reshaped
 
 
 if __name__ == "__main__":
-    path = "./data/"
-    mat_file = path + "sal_15.mat"
+    path = "./user_test_files/"
+    mat_file = path + "preprocessed_240_BL_v2.mat"
     mat = loadmat(mat_file)
-    eeg_reshaped, emg_reshaped, sleep_scores = reshape_sleep_data(mat)
+    eeg_reshaped, emg_reshaped = reshape_sleep_data(mat)
