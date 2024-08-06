@@ -2,7 +2,7 @@
 Follow the three steps listed below, in order, to train a sDREAMER model on your data.
 
 ### 1. Data files
-Each data file must be a .mat file which contains the following field: `eeg` (2D array), `emg` (2D array), `eeg_frequency` (2D array). `emg` is assumed to be sampled at the same frequency as `eeg`, so that's why only `eeg_frequency` is needed. They are assumed to have the same duration. Both `eeg` and `emg` must have the shape of [1, *t* $\times$ *f*], where *t* is the duration of recording in seconds, and *f* is the sampling frequency. `eeg_frequency` must have the shape of [1, 1]. So it's just one value, but "wrapped" as a 2D array. In addition, `eeg_frequency` must be the exact sampling frequency used by the recording equipment. Do not round it. In the next step, the rounding will be taken care of for you. If you round it now, it will result in misalignment in the sleep score prediction, especially for longer recordings. Please contact me if your data is in any way different from what's assumed here. We should be able to customize training pipeline to make it work for your data.   
+Each data file must be a .mat file which contains the following field: 1. `eeg` (2D array), 2. `emg` (2D array), 3. `eeg_frequency` (2D array), and 4) `sleep_scores` (2D array). `emg` is assumed to be sampled at the same frequency as `eeg`, so that's why only `eeg_frequency` is needed. They are assumed to have the same duration. Both `eeg` and `emg` must have the shape of [1, *t* $\times$ *f*], where *t* is the duration of recording in seconds, and *f* is the sampling frequency. `eeg_frequency` must have the shape of [1, 1]. So it's just one value, but "wrapped" as a 2D array. In addition, `eeg_frequency` must be the exact sampling frequency used by the recording equipment. Do not round it. In the next step, the rounding will be taken care of for you. If you round it now, it will result in misalignment in the sleep score prediction, especially for longer recordings. `sleep_scores` is the groundtruth. It is assumed to have the same duration as `eeg` and `emg`, and it's of shape [1, *t*]. Make sure that you don't have missing values in beginning or in the middle of your `sleep_scores`. Otherwise, the .mat file that contains such `sleep_scores` will be discarded and won't make it to the dataset for training. However, if the missing values are in the end, they will be trimmed automatically when you proceed to the next step. and all `eeg`, `emg`, and `sleep_scores` will be trimmed (on the end only) to the shorter duration in second, of `eeg` or `sleep_scores`.  Please contact me if your data is in any way different from what's assumed here. We should be able to customize training pipeline to make it work for your data.   
 
 #### Sample data
 Below is an example of a preprocessed .mat file.
@@ -40,6 +40,12 @@ Out[7]: array([[511.95964011]])
 
 mat["eeg_frequency"].item()
 Out[8]: 511.959640106313
+
+mat['sleep_scores']
+Out[9]: array([[ 0,  0,  0, ...,  2]])
+
+mat['sleep_scores'].shape
+Out[10]: (1, 12252)
 
 ```
 
