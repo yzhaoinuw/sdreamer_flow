@@ -2,7 +2,47 @@
 Follow the three steps listed below, in order, to train a sDREAMER model on your data.
 
 ### 1. Data files
-Each data file must be a .mat file which contains the following field: `emg` (array), `eeg` (array), `eeg_frequency` (float). EMG is assumed to be sampled at the same frequency as EEG, so that's why only `eeg_frequency` is needed. In addition, they are assumed to have the same duration. `eeg_frequency` must be the exact sampling rate or as precise as possible. Do not round it. In the next step, the rounding will be taken care of for you. If you round it now, it will result in misalignment in the sleep score prediction, especially for longer recordings. Please contact me if your data is in any way different from what's assumed here. We should be able to customize training pipeline to make it work for your data.   
+Each data file must be a .mat file which contains the following field: `eeg` (2D array), `emg` (2D array), `eeg_frequency` (2D array). `emg` is assumed to be sampled at the same frequency as `eeg`, so that's why only `eeg_frequency` is needed. They are assumed to have the same duration. Both `eeg` and `emg` must have the shape of [1, *t* \times *f*], where *t* is the duration of recording in seconds, and *f* is the sampling frequency. `eeg_frequency` must have the shape of [1, 1]. So it's just one value, but "wrapped" as a 2D array. In addition, `eeg_frequency` must be the exact sampling frequency used by the recording equipment. Do not round it. In the next step, the rounding will be taken care of for you. If you round it now, it will result in misalignment in the sleep score prediction, especially for longer recordings. Please contact me if your data is in any way different from what's assumed here. We should be able to customize training pipeline to make it work for your data.   
+
+#### Sample data
+Below is an example of a preprocessed .mat file.
+```python
+from scipy.io import loadmat
+
+path = "./user_test_files/"
+mat_file = path + "preprocessed_240_BL_v2.mat"
+mat = loadmat(mat_file)
+
+mat.keys()
+Out[1]: dict_keys(['__header__', '__version__', '__globals__', 'emg', 'eeg', 'eeg_frequency'])
+
+mat["eeg"].shape
+Out[2]: (1, 6272524)
+
+mat["eeg"]
+Out[3]: 
+array([[-6.1035155e-07, -2.2354126e-05, -3.1738280e-05, ...,
+        -1.6555787e-05, -1.1062622e-05, -6.1798096e-06]], dtype=float32)
+     
+mat["emg"].shape
+Out[4]: (1, 6272524)
+
+mat["emg"]
+Out[5]: 
+array([[ 2.1209717e-05, -1.5716552e-05,  1.1749267e-05, ...,
+        -4.5013426e-06, -3.0517579e-06, -1.8310546e-06]], dtype=float32)
+        
+mat["eeg_frequency"].shape
+Out[6]: (1, 1)
+
+mat["eeg_frequency"]
+Out[7]: array([[511.95964011]])
+
+mat["eeg_frequency"].item()
+Out[8]: 511.959640106313
+
+```
+
 
 ### 2. Preparing the dataset
 To prepare for the training dataset, run *write_training_data.py*. Change the code inside `if __name__ == "__main__":` as needed. Typically, you only need to change 1) `data_path ` to where you placed your preprocessed mat files, 2) `save_path ` to where you want to save the training and validation dataset, and 3) `on_hold_list` to include any files that you need to exclude (for reasons such as incomplete labels or corrupt data). See the relevant code snippet below. Once you specify these three parameters, *write_training_data.py* will turn the preprocessed data to train and validation set that's ready to be fed to the model. In addition, it will also write a list of tain-validation files, called  *train_val_split.txt*, in `save_path`. 
