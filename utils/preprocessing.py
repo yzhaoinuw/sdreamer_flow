@@ -33,11 +33,9 @@ def trim_missing_labels(filt, trim="b"):
     return filt[first:last]
 
 
-def reshape_sleep_data(mat, segment_size=512, standardize=False):
+def reshape_sleep_data(mat, segment_size=512, standardize=False, has_labels=True):
     eeg = mat["eeg"].flatten()
     emg = mat["emg"].flatten()
-    sleep_scores = mat["sleep_scores"].flatten()
-    sleep_scores = trim_missing_labels(sleep_scores, trim="b")  # trim trailing zeros
 
     if standardize:
         eeg = stats.zscore(eeg)
@@ -69,7 +67,14 @@ def reshape_sleep_data(mat, segment_size=512, standardize=False):
 
     eeg_reshaped = eeg[indices]
     emg_reshaped = emg[indices]
-    return eeg_reshaped, emg_reshaped, sleep_scores
+    if has_labels:
+        sleep_scores = mat["sleep_scores"].flatten()
+        sleep_scores = trim_missing_labels(
+            sleep_scores, trim="b"
+        )  # trim trailing zeros
+        return eeg_reshaped, emg_reshaped, sleep_scores
+
+    return eeg_reshaped, emg_reshaped
 
 
 if __name__ == "__main__":

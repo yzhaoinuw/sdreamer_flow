@@ -29,8 +29,7 @@ class SequenceDataset(Dataset):
 
 
 def make_dataset(data: dict, n_sequences: int = 64):
-    eeg, emg = reshape_sleep_data(data)
-
+    eeg, emg = reshape_sleep_data(data, has_labels=False)
     sleep_data = np.stack((eeg, emg), axis=1)
     sleep_data = torch.from_numpy(sleep_data)
     sleep_data = torch.unsqueeze(sleep_data, dim=2)  # shape [n_seconds, 2, 1, seq_len]
@@ -163,11 +162,14 @@ def infer(data, checkpoint_path, batch_size=32):
 
     return all_pred, all_prob
 
-#%%
+
+# %%
 if __name__ == "__main__":
     from scipy.io import loadmat
 
-    checkpoint_path = 'C:/Users/yzhao/python_projects/sleep_scoring/models/sdreamer/checkpoints/SeqNewMoE2_Seq_ftALL_pl16_ns64_dm128_el2_dff512_eb0_scale0.0_bs64_f1_augment_10.pth.tar'
-    mat_file = "C:/Users/yzhao/python_projects/sleep_scoring/user_test_files/sal_588.mat"
+    checkpoint_path = "C:/Users/yzhao/python_projects/sleep_scoring/models/sdreamer/checkpoints/SeqNewMoE2_Seq_ftALL_pl16_ns64_dm128_el2_dff512_eb0_scale0.0_bs64_f1_augment_10.pth.tar"
+    mat_file = (
+        "C:/Users/yzhao/python_projects/sleep_scoring/user_test_files/sal_588.mat"
+    )
     data = loadmat(mat_file)
     all_pred, all_prob = infer(data, checkpoint_path)
