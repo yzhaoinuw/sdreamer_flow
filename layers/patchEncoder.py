@@ -90,10 +90,11 @@ class CNNPatchEncoder(nn.Module):
 
 
 class PatchEncoder(nn.Module):
-    # Batch x Epoch x Trace x Channel x Time
-    # Batch x Epoch x Trace x Channel x (Patch_num x Patch_len)
-    # Batch x Epoch x Trace x Patch_num x (Channel x Patch_len)
-
+    # Input size: Batch x Epoch x Channel x Time (sampling frequency)
+    # Epoch = 64, Channel = 1, Time = sampling freq
+    # Output size: Batch x Epoch x Patch_num x d_model
+    # Patch_num = Time / Patch_len
+    
     def __init__(self, patch_len=16, in_channel=1, d_model=128):
         super().__init__()
 

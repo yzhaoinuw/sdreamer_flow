@@ -175,13 +175,13 @@ class CrossAttention(nn.Module):
 
         if exists(mask):
             assert (
-                2 <= attn_mask.ndim <= 4
+                2 <= mask.ndim <= 4
             ), "attention mask must have greater than 2 dimensions but less than or equal to 4"
-            if attn_mask.ndim == 2:
-                attn_mask = rearrange(attn_mask, "i j -> 1 1 i j")
-            elif attn_mask.ndim == 3:
-                attn_mask = rearrange(attn_mask, "h i j -> 1 h i j")
-            dots = dots.masked_fill(~attn_mask, mask_value)
+            if mask.ndim == 2:
+                mask = rearrange(mask, "i j -> 1 1 i j")
+            elif mask.ndim == 3:
+                mask = rearrange(mask, "h i j -> 1 h i j")
+            dots = dots.masked_fill(~mask, mask_value)
 
         attn = self.att_fn(dots, dim=-1)
 

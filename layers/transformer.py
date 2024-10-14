@@ -141,8 +141,8 @@ class Transformer(nn.Module):
         return {"get_pos", "get_cls"}
 
     def forward(self, x):
-        x = self.patch_ecncoder(x)
-        x = self.get_cls(x)
+        x = self.patch_ecncoder(x) # shape ex. [32, 64, 32, 128]
+        x = self.get_cls(x) # shape ex. [32, 64, 33, 128], ie. added cls token
         x = self.get_pos(x)
         x = self.get_mod(x)
         attns = []
@@ -1030,6 +1030,9 @@ class SeqNewMoETransformer2(nn.Module):
         return {"get_pos", "get_cls"}
 
     def infer(self, eeg, emg):
+        # with cls set to False, the eeg_loader does not add cls token,
+        # nor does it run the patch_encoder. basically, only pos embedding
+        # is added
         eeg_embs, eeg_mask = self.eeg_loader(eeg)
         emg_embs, emg_mask = self.emg_loader(emg)
         eeg_embs, emg_embs = (

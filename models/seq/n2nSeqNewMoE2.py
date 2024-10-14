@@ -27,7 +27,7 @@ class Model(nn.Module):
         n_sequences = args.n_sequences
         self.output_attentions = args.output_attentions
         d_head = d_model // n_heads
-        inner_dim = n_heads * d_head
+        inner_dim = n_heads * d_head # equal to d_model
         mult_ff = args.d_ff // d_model
         n_traces = 2 if args.features == "ALL" else 1
 
@@ -89,7 +89,7 @@ class Model(nn.Module):
             norm=norm_type,
             mult=mult_ff,
             mix_type=args.mix_type,
-            cls=False,
+            cls=False, # does not add cls token
             flag="epoch",
             domain="time",
             mixffn_start_layer_index=mixffn_start_layer_index,
@@ -102,9 +102,10 @@ class Model(nn.Module):
 
     def forward(self, x, label):
         # note: if no context is given, cross-attention defaults to self-attention
-        # x --> [batch, trace, channel, inner_dim]
-        eeg, emg = x[:, :, 0], x[:, :, 1]
+        # x shape: [batch, epoch, trace, channel, sampling_freq], eg. [32, 64, 2, 1, 512]
+        eeg, emg = x[:, :, 0], x[:, :, 1] 
 
+        # eeg, emg shape: [batch, epoch, channel, sampling_freq], eg, [32, 64, 1, 512]
         eeg, eeg_attn = self.eeg_transformer(eeg)
         emg, emg_attn = self.emg_transformer(emg)
 
