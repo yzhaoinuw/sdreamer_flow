@@ -272,7 +272,9 @@ with torch.no_grad():
     for i, blk in enumerate(moe_transformer.transformer):
         x = blk(x, mask=co_masks, modality_type="mix")
 
+    x.shape # torch.Size([32, 128, 128])
     x = moe_transformer.norm(x)
     cls_feats = moe_transformer.pool(x)
+    cls_feats.shape # torch.Size([32, 64, 128])
     logits = model.cls_head(cls_feats)
     logits.shape # torch.Size([32, 64, 3])
