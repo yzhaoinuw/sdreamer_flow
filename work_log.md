@@ -41,6 +41,15 @@ Keep the parenthetical compact. Examples:
 Newest entry goes on top. If the session did multiple distinct pieces of work, use multiple `###` subsections under one `##` date header.
 -->
 
+## 2026-06-16
+
+### Traced the data pipeline; created parent WORKSPACE_OVERVIEW.md; sharpened project_overview data section (claude-opus-4-8, default thinking)
+
+- Compared the parent-workspace prototype scripts (`../preprocessing.py`, `../make_augmented_data.py`) to the repo's `utils/preprocessing.py` + `write_training_data.py`: same core algorithm; the repo versions added `has_labels` (inference on unlabeled `.mat`), a reusable `write_data()` API, and the `train_val_split.txt` manifest. Minor off-by-one in the REM-window upper bound (`len-seq_len+1` parent vs `len-seq_len` repo; both stay in-bounds). The parent scripts are the originals; the repo versions are the maintained descendants.
+- Mapped the external data flow and disambiguated the sibling dirs: source `.mat` files (68) at `../20231006_new_data_for_testing_the_model/Mie_newdata/preprocessed_data/`; **current** training tensors at `../sdreamer_data/n_seq_64/fold_1/` (train `[9269,64,2,1,512]` float32, read by `run_train_sdreamer.py`); `../sdreamer_output_data_augmented_10/seq/...` is an earlier ×10-augmented set (float64, no manifest, superseded); `../sdreamer_output_data*/` and `../sdreamer_datan_seq_64/` are empty scaffolds; `../sdreamer_input_data/` holds older per-recording `.npy`.
+- Created `../WORKSPACE_OVERVIEW.md` (parent dir, **not** version-controlled) with the full workspace/data map. Updated `project_overview.md`: concrete `.mat` path + tensor shapes (the old pointer was a stale `C:/Users/...` placeholder), a prototype-lineage note, and a sharper sibling-dir note.
+- Verification: tensor shapes/dtypes read via `np.load(..., mmap_mode='r')`; dir contents confirmed with `find`. Docs-only; no pipeline code changed, no training run.
+
 ## 2026-06-15
 
 ### Committed + pushed the treaty adoption; parked Mie edit moved to stash; origin switched to SSH (claude-opus-4-8, default thinking)

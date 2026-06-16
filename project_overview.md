@@ -26,6 +26,8 @@ Stack: PyTorch, `einops`, `timm` (DropPath / weight init), scikit-learn (KFold +
 - `augment=True` upsamples windows around **REM (class 2)** transitions (`upsampling_scale` copies each) to fight REM rarity.
 - 5-fold split via `KFold(n_splits=5, shuffle=True, random_state=42)`; writes `train_trace{fold}.npy`, `train_label{fold}.npy`, `val_trace{fold}.npy`, `val_label{fold}.npy` plus a `train_val_split.txt` manifest into `save_path` (default `.../sdreamer_data/n_seq_64/fold_1/`). Files in `on_hold_list`, or any file with NaN / `-1` labels, are excluded.
 
+> Lineage: standalone prototypes of this step live in the parent workspace (`../preprocessing.py`, `../make_augmented_data.py`) — same algorithm, but hardcoded paths, no `train_val_split.txt`, and a `reshape_sleep_data` that lacks the `has_labels` inference path. `write_training_data.py` + `utils/preprocessing.py` are the maintained descendants. The parent's `../WORKSPACE_OVERVIEW.md` maps the external data / checkpoint dirs.
+
 ### 2. Training entrypoint
 
 [`run_train_sdreamer.py`](run_train_sdreamer.py)
@@ -105,8 +107,10 @@ sdreamer_flow/
 |- moe_Launch*.py, train_Launch*.py, moe_Eval.py   # legacy launchers (superseded)
 ```
 
-> Note: the actual training data and checkpoints live **outside** this repo, in sibling dirs
-> `../sdreamer_data/`, `../sdreamer_checkpoints/`, `../sdreamer_input_data/`, `../sdreamer_output_data*/`.
+> Note: the actual training data and checkpoints live **outside** this repo, in sibling dirs —
+> `../sdreamer_data/` (current tensors used by training), `../sdreamer_checkpoints/` (checkpoints + run logs),
+> `../sdreamer_input_data/` (older per-recording `.npy`), and `../sdreamer_output_data*/` (earlier / empty
+> tensor outputs). See `../WORKSPACE_OVERVIEW.md` for the disambiguated map.
 
 ## What Looks Active vs. Legacy
 
@@ -141,7 +145,7 @@ There is no automated test suite (the Copier `test_command` is empty). Verificat
 - Data-prep sanity: confirm `write_training_data.py` writes the four `.npy` files + `train_val_split.txt` and that shapes are `[N, 64, 2, 1, 512]` (traces) / `[N, 64, 1]` (labels).
 - Training sanity: run a few epochs and watch the `<setting>.log` for rising train/val accuracy.
 
-Canonical sample data: the lab's preprocessed `.mat` recordings (see the `data_path` in `write_training_data.py`'s `__main__`) and the cached tensors under `../sdreamer_data/n_seq_64/fold_1/`.
+Canonical sample data: the lab's preprocessed `.mat` recordings at `../20231006_new_data_for_testing_the_model/Mie_newdata/preprocessed_data/` (68 files) and the cached tensors under `../sdreamer_data/n_seq_64/fold_1/` (train `[9269, 64, 2, 1, 512]`, val `[1696, …]`, float32). Note: `write_training_data.py`'s `__main__` still has a stale `C:/Users/...` placeholder for `data_path` — use the lab path above.
 
 ## User Data Expectations
 
