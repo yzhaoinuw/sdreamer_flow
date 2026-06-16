@@ -43,6 +43,13 @@ Newest entry goes on top. If the session did multiple distinct pieces of work, u
 
 ## 2026-06-16
 
+### Investigated the intern's (Jaysen) experiments; started the NE port on branch `experiments/ne` (claude-opus-4-8, default thinking)
+
+- Surveyed `../../jaysenSS/sdreamer_train_jsc/` (his GitHub `zhisencong727/sdreamer_train_jsc`, a copy of this repo, all commits by `zcong2@u.rochester.edu` — not the user). Pulled it up to date (`3f949b7`, was 3 behind; recovered his `difference.txt` handoff note).
+- Findings (see `EXPERIMENTS.md` for the full table): his best result is **NE channel + "mixed" training** (~0.928 val acc) — a single model scores with/without NE by zeroing NE for half of each batch (a training-process change; he made **no** model edits — `layers/ne_moe.py` was already ours). REM augmentation **hurts** (REM over-prediction) in both his threads; `patch_len=16`>8 and `n_sequences=64`>256/512.
+- Created branch `experiments/ne` and ported (code-only, untested — no GPU/NE data here): `utils/preprocessing_ne.py`, `write_training_data_ne.py`, `run_train_ne.py` (paths adapted to our `../sdreamer_data_ne/` + `../sdreamer_checkpoints/`), and the mixed-training NE-zeroing in `exp/exp_ne.py` gated on a new `ne_mix_ratio` config (default 0.0; `run_train_ne.py` sets 0.5).
+- Verification: `python -m py_compile` passes on all four ported/edited files. No training run (needs GPU + NE-bearing `.mat`). See `EXPERIMENTS.md` "To actually run / verify".
+
 ### Removed the redundant parent-dir data-prep prototypes (claude-opus-4-8, default thinking)
 
 - Deleted `../preprocessing.py`, `../make_augmented_data.py`, and the orphaned `../__pycache__/` at the user's request — they duplicated the repo's `write_training_data.py` + `utils/preprocessing.py` (the single source of truth). No code referenced them; only docs did.

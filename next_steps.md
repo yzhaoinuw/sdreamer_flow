@@ -6,6 +6,7 @@ Use this checklist alongside `work_log.md`.
 
 Active threads — read these first to know what work is in flight:
 
+- **NE experiment port (branch `experiments/ne`)** — porting the intern's (Jaysen) best-performing work: a single model that scores with **or** without NE, trained by zeroing the NE channel for half of each batch ("mixed" training, his val acc ~0.928). Code is ported but **untested**: `utils/preprocessing_ne.py`, `write_training_data_ne.py`, `run_train_ne.py`, and a gated `ne_mix_ratio` in `exp/exp_ne.py`. See `EXPERIMENTS.md` for findings + the run/verify TODO (needs NE-bearing `.mat` data + a GPU run). Related future branches: `experiments/piecewise-norm`, `experiments/augmentation`.
 - **Data prep on new Mie dataset** — a `write_training_data.py` edit (repoint to the lab's `Mie_newdata/preprocessed_data/`, write to `../sdreamer_data/n_seq_64/fold_1/`, `augment=True`) is **parked in `git stash` (`stash@{0}`)**, not in the working tree. It was based on the old pre-treaty `main` (`c418786`); the committed `write_training_data.py` has since been reformatted upstream, so reapply the change by hand rather than `git stash pop` blindly. Next action: reapply the path/augment change, regenerate the `.npy` tensors, confirm shapes.
 
 Other sections below are background or paused; treat them as reference unless a new request reopens them.

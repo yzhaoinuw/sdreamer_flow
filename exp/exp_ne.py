@@ -182,6 +182,15 @@ class Exp_Main(object):
                 nes = nes.to(self.device)
                 labels = labels.to(self.device)
 
+                # Mixed NE training (ported from jaysenSS/sdreamer_train_jsc): zero the NE
+                # channel for a fraction of the batch so a single model learns to score
+                # with and without NE. Set ne_mix_ratio in the run config (Jaysen used 0.5).
+                ne_mix_ratio = getattr(args, "ne_mix_ratio", 0.0)
+                if ne_mix_ratio > 0:
+                    n_zero = int(nes.size(0) * ne_mix_ratio)
+                    zero_idx = torch.randperm(nes.size(0))[:n_zero]
+                    nes[zero_idx] = 0
+
                 out_dict = model(traces, nes, labels)
                 out = out_dict["out"]
                 label = out_dict["label"]
@@ -237,6 +246,15 @@ class Exp_Main(object):
             traces = traces.to(device)
             nes = nes.to(device)
             labels = labels.to(device)
+
+            # Mixed NE training (ported from jaysenSS/sdreamer_train_jsc): zero the NE
+            # channel for a fraction of the batch so a single model learns to score
+            # with and without NE. Set ne_mix_ratio in the run config (Jaysen used 0.5).
+            ne_mix_ratio = getattr(args, "ne_mix_ratio", 0.0)
+            if ne_mix_ratio > 0:
+                n_zero = int(nes.size(0) * ne_mix_ratio)
+                zero_idx = torch.randperm(nes.size(0))[:n_zero]
+                nes[zero_idx] = 0
 
             out_dict = model(traces, nes, labels)
             out = out_dict["out"]
