@@ -6,21 +6,21 @@ Use this checklist alongside `work_log.md`.
 
 Active threads — read these first to know what work is in flight:
 
-- **Data prep on new Mie dataset** — `write_training_data.py` is edited (uncommitted) to point at the lab's `Mie_newdata/preprocessed_data/` and write to `../sdreamer_data/n_seq_64/fold_1/` with `augment=True`. Next action: regenerate the `.npy` tensors and confirm shapes, then commit the path/augment change.
+- **Data prep on new Mie dataset** — a `write_training_data.py` edit (repoint to the lab's `Mie_newdata/preprocessed_data/`, write to `../sdreamer_data/n_seq_64/fold_1/`, `augment=True`) is **parked in `git stash` (`stash@{0}`)**, not in the working tree. It was based on the old pre-treaty `main` (`c418786`); the committed `write_training_data.py` has since been reformatted upstream, so reapply the change by hand rather than `git stash pop` blindly. Next action: reapply the path/augment change, regenerate the `.npy` tensors, confirm shapes.
 
 Other sections below are background or paused; treat them as reference unless a new request reopens them.
 
 ## Data prep on new Mie dataset (claude-opus-4-8, default thinking)
 
-Status: in progress (working-tree change, not committed)
+Status: parked in `git stash` (`stash@{0}`); needs reapplying onto the reformatted `write_training_data.py`
 
-The `__main__` block of `write_training_data.py` now uses absolute lab paths instead of the old Windows `C:/Users/...` paths, and turns on REM augmentation (`augment=True`). This matches the default `data_path="../sdreamer_data/"` that `run_train_sdreamer.py` reads.
+The edit makes the `__main__` block use absolute lab paths instead of the old Windows `C:/Users/...` paths and turns on REM augmentation (`augment=True`), matching the default `data_path="../sdreamer_data/"` that `run_train_sdreamer.py` reads. ⚠️ It currently lives in `git stash` (`stash@{0}`), based on the pre-treaty `main` (`c418786`); since then the committed `write_training_data.py` was reformatted (seq_len/fold reordered, the `train_val_split.txt` write reflowed), so reapply the change by hand instead of popping the stash blindly.
 
 Remaining work:
 
 - Run `python write_training_data.py`, verify the four `.npy` files + `train_val_split.txt` land under `../sdreamer_data/n_seq_64/fold_1/` with expected shapes (`[N, 64, 2, 1, 512]` traces, `[N, 64, 1]` labels).
 - Kick off a short `run_train_sdreamer.py` run and confirm train/val accuracy looks sane in the `<setting>.log`.
-- Commit the data-prep path + `augment=True` change.
+- Reapply the stashed path + `augment=True` change onto the reformatted file, then commit it.
 
 ## Background / Paused
 

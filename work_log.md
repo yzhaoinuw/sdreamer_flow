@@ -43,6 +43,13 @@ Newest entry goes on top. If the session did multiple distinct pieces of work, u
 
 ## 2026-06-15
 
+### Committed + pushed the treaty adoption; parked Mie edit moved to stash; origin switched to SSH (claude-opus-4-8, default thinking)
+
+- Committed the treaty docs (`AGENTS.md`, `project_overview.md`, `next_steps.md`, `work_log.md` + `work_log_archive/`, `.copier-answers.yml`) plus the treaty-adopted SVG badge in `README.md` as `bfb8b15` on `dev`, then fast-forwarded `main` to it. `origin/dev` and `origin/main` are both at `bfb8b15`.
+- The earlier "uncommitted working-tree" Mie data-prep edit to `write_training_data.py` is now in `git stash` (`stash@{0}`): local `main` was 9 commits behind `origin/main` and the upstream file had been reformatted, so the stale edit could not ride onto `dev` cleanly. See `next_steps.md` — reapply by hand, do not `git stash pop` blindly.
+- Switched the `origin` remote from HTTPS to SSH (`git@github.com:yzhaoinuw/sdreamer_flow.git`) and deleted the expired `../PAT.txt`; HTTPS/PAT push auth was failing, the SSH key works from compute nodes.
+- Verification: pushes reported `867e8e5..bfb8b15 dev -> dev` and `b882cab..bfb8b15 dev -> main`; `git branch -vv` shows local `main`/`dev` synced to origin at `bfb8b15`.
+
 ### Filled in the agent-collab treaty docs after a full repo/architecture read (claude-opus-4-8, default thinking)
 
 - Read the active pipeline end-to-end: `run_train_sdreamer.py` (config/entrypoint) → `exp/exp_moe2.py` (`Exp_MoE`) → `models/seq/n2nSeqNewMoE2.py` (`Model`) → `layers/` (transformer/attention/patch/head), plus `write_training_data.py` + `utils/preprocessing.py` (data prep) and `data_provider/` (`Seq_Loader`).
