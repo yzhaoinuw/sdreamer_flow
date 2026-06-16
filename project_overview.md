@@ -26,8 +26,6 @@ Stack: PyTorch, `einops`, `timm` (DropPath / weight init), scikit-learn (KFold +
 - `augment=True` upsamples windows around **REM (class 2)** transitions (`upsampling_scale` copies each) to fight REM rarity.
 - 5-fold split via `KFold(n_splits=5, shuffle=True, random_state=42)`; writes `train_trace{fold}.npy`, `train_label{fold}.npy`, `val_trace{fold}.npy`, `val_label{fold}.npy` plus a `train_val_split.txt` manifest into `save_path` (default `.../sdreamer_data/n_seq_64/fold_1/`). Files in `on_hold_list`, or any file with NaN / `-1` labels, are excluded.
 
-> Lineage: standalone prototypes of this step live in the parent workspace (`../preprocessing.py`, `../make_augmented_data.py`) — same algorithm, but hardcoded paths, no `train_val_split.txt`, and a `reshape_sleep_data` that lacks the `has_labels` inference path. `write_training_data.py` + `utils/preprocessing.py` are the maintained descendants. The parent's `../WORKSPACE_OVERVIEW.md` maps the external data / checkpoint dirs.
-
 ### 2. Training entrypoint
 
 [`run_train_sdreamer.py`](run_train_sdreamer.py)

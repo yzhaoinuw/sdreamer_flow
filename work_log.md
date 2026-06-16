@@ -43,6 +43,11 @@ Newest entry goes on top. If the session did multiple distinct pieces of work, u
 
 ## 2026-06-16
 
+### Removed the redundant parent-dir data-prep prototypes (claude-opus-4-8, default thinking)
+
+- Deleted `../preprocessing.py`, `../make_augmented_data.py`, and the orphaned `../__pycache__/` at the user's request — they duplicated the repo's `write_training_data.py` + `utils/preprocessing.py` (the single source of truth). No code referenced them; only docs did.
+- Updated docs to match: removed the now-moot prototype-lineage note from `project_overview.md`, and trimmed the prototype comparison out of `../WORKSPACE_OVERVIEW.md`.
+
 ### Traced the data pipeline; created parent WORKSPACE_OVERVIEW.md; sharpened project_overview data section (claude-opus-4-8, default thinking)
 
 - Compared the parent-workspace prototype scripts (`../preprocessing.py`, `../make_augmented_data.py`) to the repo's `utils/preprocessing.py` + `write_training_data.py`: same core algorithm; the repo versions added `has_labels` (inference on unlabeled `.mat`), a reusable `write_data()` API, and the `train_val_split.txt` manifest. Minor off-by-one in the REM-window upper bound (`len-seq_len+1` parent vs `len-seq_len` repo; both stay in-bounds). The parent scripts are the originals; the repo versions are the maintained descendants.
