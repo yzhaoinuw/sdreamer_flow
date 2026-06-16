@@ -1,3 +1,5 @@
+[![Agent Collab Treaty](https://raw.githubusercontent.com/yzhaoinuw/agent_collab_treaty/main/assets/treaty-adopted.svg)](https://github.com/yzhaoinuw/agent_collab_treaty)
+
 ## Prerequisite
 Please first make sure that you have set up a environment with all the packages listed in requirements.txt installed. If possible, use the version specified for each corresponding package. For pytorch, install the cuda version that's right for your gpu. If you train the model with cuda and with the default config (recommended), you may need GPU memory of 16G or more. You may run into GPU out of memory issue with smaller memory. 
 
