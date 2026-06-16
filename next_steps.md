@@ -6,6 +6,7 @@ Use this checklist alongside `work_log.md`.
 
 Active threads — read these first to know what work is in flight:
 
+- **NE experiment port — on branch `experiments/ne` (not `main`).** The intern (Jaysen)'s best result — a single model scoring with/without NE via "mixed" training (~0.928 val acc) — is ported there (commit `b50250c`). Run `git checkout experiments/ne` and read its `EXPERIMENTS.md` for the findings table + run/verify TODO (untested; needs NE-bearing `.mat` + a GPU run). Findings that apply here too: REM augmentation hurts (relevant to the Mie `augment=True` below); `patch_len=16` > 8; `n_sequences=64` > 256/512.
 - **Data prep on new Mie dataset** — a `write_training_data.py` edit (repoint to the lab's `Mie_newdata/preprocessed_data/`, write to `../sdreamer_data/n_seq_64/fold_1/`, `augment=True`) is **parked in `git stash` (`stash@{0}`)**, not in the working tree. It was based on the old pre-treaty `main` (`c418786`); the committed `write_training_data.py` has since been reformatted upstream, so reapply the change by hand rather than `git stash pop` blindly. Next action: reapply the path/augment change, regenerate the `.npy` tensors, confirm shapes.
 
 Other sections below are background or paused; treat them as reference unless a new request reopens them.
@@ -32,4 +33,4 @@ Last-known state: an experiment to add a CRF as the top layer (`exp/exp_moe2_crf
 
 ### NE (neuromodulation) branch
 
-Last-known state: a parallel pipeline that adds an NE channel exists (`*NE.py` models, `data_generator_ne.py`, `exp_ne.py` / `exp_moe_ne.py`, `scripts_ne/`, `data/*_wNE/`). Not on the active path; parked pending a decision on whether NE data is in scope for this repo.
+**No longer just parked — active port in progress on branch `experiments/ne`** (see Currently Hot + that branch's `EXPERIMENTS.md`). The NE pipeline (`*NE.py` models, `data_generator_ne.py`, `exp_ne.py` / `exp_moe_ne.py`, `layers/ne_moe.py`) already lives in this repo. The intern (Jaysen) showed NE + "mixed" training (zero NE for half of each batch → one model scores with/without NE) reaches ~0.928 val acc; the port adds the NE data pipeline (`write_training_data_ne.py`, `utils/preprocessing_ne.py`, `run_train_ne.py`) and a gated `ne_mix_ratio` option in `exp_ne.py` on that branch. Untested — needs NE-bearing `.mat` data + a GPU run.
