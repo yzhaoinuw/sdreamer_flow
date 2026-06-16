@@ -33,4 +33,4 @@ Last-known state: an experiment to add a CRF as the top layer (`exp/exp_moe2_crf
 
 ### NE (neuromodulation) branch
 
-Last-known state: a parallel pipeline that adds an NE channel exists (`*NE.py` models, `data_generator_ne.py`, `exp_ne.py` / `exp_moe_ne.py`, `scripts_ne/`, `data/*_wNE/`). Not on the active path; parked pending a decision on whether NE data is in scope for this repo.
+**No longer just parked — active port in progress on branch `experiments/ne`** (see Currently Hot + that branch's `EXPERIMENTS.md`). The NE pipeline (`*NE.py` models, `data_generator_ne.py`, `exp_ne.py` / `exp_moe_ne.py`, `layers/ne_moe.py`) already lives in this repo. The intern (Jaysen) showed NE + "mixed" training (zero NE for half of each batch → one model scores with/without NE) reaches ~0.928 val acc; the port adds the NE data pipeline (`write_training_data_ne.py`, `utils/preprocessing_ne.py`, `run_train_ne.py`) and a gated `ne_mix_ratio` option in `exp_ne.py` on that branch. Untested — needs NE-bearing `.mat` data + a GPU run.
